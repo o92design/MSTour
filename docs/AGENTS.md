@@ -73,7 +73,65 @@ This document defines specialized agents for delegating tasks within the MS Tour
 
 ---
 
-### 5. Jira Integration Agent
+### 5. Game Design Consultant Agent
+**Name**: `game-design-consultant`  
+**Specialization**: Interactive game design discussion and exploration  
+**Use for**:
+- Exploring game mechanics and systems ideas
+- Evaluating design decisions
+- Applying game design principles (Schell, Koster, Adams)
+- Discussing player experience and engagement
+- Analyzing design trade-offs
+- Content design (islands, routes, cargo, events)
+- Balance and progression discussions
+
+**Design Philosophy**:
+- Inspired by Jesse Schell's "The Art of Game Design: A Book of Lenses"
+- Raph Koster's "A Theory of Fun for Game Design"
+- Ernest Adams' "Fundamentals of Game Design"
+
+**Example prompts**:
+- "Let's explore how ship fuel mechanics could create meaningful choices"
+- "Evaluate the progression curve for unlocking new islands"
+- "What are the core patterns players should learn in MS Tour?"
+- "How can we balance challenge and accessibility in route planning?"
+
+---
+
+### 6. Game Design Creator Agent
+**Name**: `game-design-creator`  
+**Specialization**: Formal game design documentation and specifications  
+**Use for**:
+- Creating Game Design Documents (GDDs)
+- Writing feature specifications
+- Documenting game systems formally
+- Creating balance and tuning documents
+- Writing content specifications
+- UI/UX specifications
+- Maintaining design documentation
+
+**Document Types**:
+- Feature specifications
+- System design documents
+- Balance sheets and formulas
+- Content specifications (islands, cargo types, events)
+- Player experience maps
+- UI/UX specifications
+
+**Example prompts**:
+- "Create a formal specification for the cargo trading system"
+- "Document the ship upgrade progression with formulas and values"
+- "Write a feature spec for weather effects on shipping routes"
+- "Create a balance document for the game economy"
+
+**Workflow with Consultant**:
+1. Use `game-design-consultant` to explore and discuss ideas
+2. Use `game-design-creator` to formalize and document decisions
+3. Creator produces implementation-ready specifications
+
+---
+
+### 7. Jira Integration Agent
 **Name**: `jira-agent`  
 **Specialization**: Jira ticket management and updates  
 **Use for**:
@@ -122,7 +180,7 @@ This document defines specialized agents for delegating tasks within the MS Tour
 
 ---
 
-### 6. Build & CI Agent
+### 8. Build & CI Agent
 **Name**: `build-agent`  
 **Specialization**: Build system and continuous integration  
 **Use for**:
@@ -142,10 +200,11 @@ This document defines specialized agents for delegating tasks within the MS Tour
 ## Agent Usage Guidelines
 
 ### When to delegate:
-1. **Complex subsystems**: Delegate to specialized agents (engine, game)
-2. **Testing**: Always use test-agent for comprehensive test coverage
-3. **Documentation**: Use docs-agent for formal documentation
-4. **Jira updates**: Use jira-agent after completing tasks
+1. **Game Design**: Use game-design-consultant for exploration, game-design-creator for documentation
+2. **Complex subsystems**: Delegate to specialized agents (engine, game)
+3. **Testing**: Always use test-agent for comprehensive test coverage
+4. **Documentation**: Use docs-agent for technical/code documentation
+5. **Jira updates**: Use jira-agent after completing tasks
 
 ### How to delegate:
 ```
@@ -186,13 +245,15 @@ Use the task tool with appropriate agent_type:
 
 ## Example Delegation Flows
 
-### Implementing a New Feature
-1. **Planning**: Main agent creates implementation plan
-2. **Engine Work**: Delegate to engine-agent
-3. **Game Integration**: Delegate to game-agent
-4. **Testing**: Delegate to test-agent
-5. **Documentation**: Delegate to docs-agent
-6. **Jira Update**: Delegate to jira-agent
+### Designing and Implementing a New Feature
+1. **Design Exploration**: Delegate to game-design-consultant (explore mechanics, balance, player experience)
+2. **Design Documentation**: Delegate to game-design-creator (formal specifications)
+3. **Planning**: Main agent creates implementation plan
+4. **Engine Work**: Delegate to engine-agent (if needed)
+5. **Game Integration**: Delegate to game-agent
+6. **Testing**: Delegate to test-agent
+7. **Documentation**: Delegate to docs-agent (technical/code docs)
+8. **Jira Update**: Delegate to jira-agent
 
 ### Fixing a Bug
 1. **Investigation**: Use explore agent to find issue
@@ -205,6 +266,20 @@ Use the task tool with appropriate agent_type:
 2. **Write Tests**: test-agent implements
 3. **Verify**: test-agent runs suite
 4. **Document**: Add to test plan
+
+### Game Design Workflow
+1. **Explore Ideas**: game-design-consultant discusses mechanics, balance, player experience
+2. **Make Decisions**: Collaborate with consultant to evaluate options
+3. **Document Design**: game-design-creator formalizes specifications
+4. **Review & Iterate**: Refine design based on review
+5. **Implementation**: Pass specs to game-agent/engine-agent
+6. **Playtest & Balance**: Test and iterate using consultant feedback
+
+**Agent Separation**:
+- **game-design-consultant**: Explores "what should we design?"
+- **game-design-creator**: Documents "here's what we decided"
+- **game-agent**: Implements "here's how it works in code"
+- **docs-agent**: Documents "here's how to use the code"
 
 ---
 
