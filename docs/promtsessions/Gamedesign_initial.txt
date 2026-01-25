@@ -1,0 +1,454 @@
+ - How much micromanagement in Act 1 vs. Act 3?
+   - Do we introduce delegation/automation mechanics as protagonist ages?
+   - Or does player always have same control level?
+   A: Here I'm thinking we might even go with a Euro Truck Simulator style of gameplay where we will steer our first ship and handle upgrades etc.
+	Later we will purchase different ships that needs to be either controlled by hired employee or by the player depending if ships are in repair.
+  What would also be interesting is to develop something of a ship-builder where the player can create their own ships sort of like Ultimate Admiral: Dreadnoughts
+ - Historical events integration?
+   - Do real events (WWI, economic crashes) affect gameplay?
+   - Scripted or dynamic?
+   A: Major scripted events will occur like WW1, WW2 and Economic crashes - replayability makes the player plan for it a second time.
+   Dynamic events happen to shipping routes due to weather phenomenons or other evens like other ships aground and choise to help.
+ - Protagonist customization?
+   - Name, appearance, background choices at start?
+   - Or fixed character?
+   A: Name (maybe only lastname due to protagonist being a male) and Company name will be player input in the beginning with the player giving the establishment contract of the company.
+ - Family/personal life?
+   - Does protagonist marry, have children?
+   - Are they just story elements or gameplay mechanics?
+   A: Wife (journey to marry her in act 1 - maybe end of act 1 will be the wedding?) will always be a standing story element and also an gameplay mechanic in order to woe her through different events.
+ - Death timing:
+   - Always at 60 years (1947)?
+   - Can you "die early" from bankruptcy/events?
+   - Can you retire early if goals met?
+   A: Always 60 years but the ending will be cold and somber with empty frames etc in order to show what could have been.
+ - Replayability:
+   - Different starting ships lead to different stories?
+   - Random events make each playthrough unique?
+   - New Game+ with bonuses?
+   A: We will have two main gameplay lines - shipping goods or shipping people. With the intertwinning of routes being the main mechanic.
+   Regarding shipping people I'm thinking about touring having some different mechanics with point of interest and a people interest mechanic dealing with
+   Nature, Historical, Military. This will emphasize the game toward planning of tours.
+   One thinking is that maybe we should even focus on the touring aspect of the game for now and have a goods dlc developed afterwards and after that maybe
+   have an international dlc with shipping oppurtunities to the world.
+
+----
+
+The Euro Truck Simulator Pivot - BRILLIANT
+
+   This solves the "50+ ships" micromanagement problem elegantly:
+
+   Act 1: You ARE the Captain
+
+     - Direct control of your first ship (ETS2-style)
+     - Intimate connection - you're driving this vessel yourself
+     - Teaching through doing - learn routes, weather, navigation by experience
+     - Personal stakes - your mistakes are visceral
+     - Romance subplot - wooing your future wife while building business
+
+   Act 2-3: You're the Fleet Manager
+
+     - Delegation - hire captains for other ships
+     - Strategic oversight - manage routes, not individual voyages
+     - Crisis intervention - when ship breaks or captain fails, YOU take the wheel
+     - Nostalgia - occasionally captain your flagship for special occasions
+
+   This creates emotional attachment - your first ship isn't just "Ship #1," it's YOUR vessel that you personally steered through storms.
+
+   Design Question: Control Depth
+
+   How detailed is direct ship control?
+
+     - Full sim: Throttle, steering, docking challenges (high skill ceiling) <- this one since I want the player to be in control here and have a challenge of not grounding / capsizing - dokcing will be like ETS2 where the player can choose to undock/dock in order to get higher xp.
+     - Accessible: Point-and-click navigation with some manual intervention (medium)
+     - Simplified: Route-based with mini-games for events (accessible)
+
+   Given your target audience (management sim players, not hardcore sim), I'd suggest Accessible - engaging enough to feel connected, not so complex it alienates.
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🛠️ Ship Builder Mechanic - Integration Challenge
+
+   Ultimate Admiral: Dreadnoughts-style customization is amazing but raises questions:
+
+   Scope Concern:
+
+   Custom ship building is a HUGE feature. How deep?
+
+     - Full custom: Hull design, engine placement, cabin layouts (massive dev time)
+     - Modular: Choose hull type + engine + amenities (medium dev time)
+     - Upgrade-based: Start with base ship, add improvements (minimal dev time)
+
+   Historical Accuracy:
+
+   1887 = pre-dreadnought era. Ship types would be:
+
+     - Sailing vessels (older, cheaper, weather-dependent)
+     - Steam ships (modern, expensive, reliable)
+     - Hybrid sail-steam (transitional technology)
+
+   My Recommendation:
+
+   Phase 1 (Tourism release): Modular upgrades
+
+     - Choose from historical ship types (schooner, steamboat, passenger ferry)
+     - Upgrade: Engine, passenger capacity, amenities (bar, dining, viewing decks)
+     - Visual customization: Paint schemes, flags
+
+   Phase 2 (Goods DLC): Expand ship types
+
+     - Cargo vessels, specialized ships
+
+   Phase 3 (Future): Full ship builder if demand exists
+
+   Question: Does custom ship building align with the "historical life story" theme, or does it risk feeling too gamey/anachronistic?
+   A: Well during this age swedish shipyards built and upgraded lots of different ships so it would be a nice touch having it in the game.
+   For now we could go with a more upgrade-based approach but with ship-building in mind. Here I'm thinking we're splitting the vessel up in different parts and levels,
+   Bow, bow-connector, mid, stern-connector, stern. 
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   💑 Marriage Mechanic - The Emotional Core of Act 1
+
+   This is genius - it gives Act 1 a clear narrative arc beyond "make money."
+
+   Wooing Mechanics (from your mind map + narrative):
+
+     - Impress her - successful tours, reputation, stability
+     - Court her - special events, gifts, time spent
+     - Prove yourself - overcome challenge (survive first winter? Pay off debt?)
+     - Wedding - end of Act 1 milestone
+
+   Design as "Tutorial Narrative":
+
+   Lens of Learning (Koster): The romance isn't just flavor - it teaches game systems!
+
+   Example Flow:
+
+     - Meet her (Tutorial ends) - She's a passenger on your first tour
+     - Impress her - Learn touring mechanics to give good tours
+     - Court her - Earn money to afford dates/gifts (economy lesson)
+     - Survive winter - Prove you're stable (risk management lesson)
+     - Wedding (End Act 1) - You've mastered basics, ready for Act 2
+
+   Emotional Payoff: Act 1 ends with hope and celebration
+
+     - Wedding scene
+     - Transition: "And so began our life together..."
+     - Act 2 starts: Now you're building not just for yourself, but for family
+
+   Questions:
+
+     - Is wife a character or abstract?
+       - Does she have personality, dialogue, presence? (Deep)
+       - Or is she mentioned in narration only? (Light)
+      A: She has a deep presence that drives the narrative
+     - Does she appear in Act 2-3?
+       - Does she age alongside protagonist?
+       - Does she attend events, offer advice, react to your choices?
+       - Is she present at deathbed scene?
+      A: Maybe she is the one that continues the story-telling due to protagonist is on his lasts breath and the ending line would be something like sleep now my love?
+      We could maybe even have this mechanized in the beginning that the user will choose if the child says grand-papa or grand-mama? But then if you choose grand-mama it will be a tougher challenge due to historical hardships for women?
+     - Children?
+       - Are they gameplay mechanics (hire son as captain?) or story elements?
+       - Does one become your successor?
+       A: Yes they should be gameplay mechanics and events. Also maybe randomize personality in order to have a new fresh replayability
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🎯 Focus on Tourism First - Strategic & Smart
+
+   Your decision to focus on touring is excellent for several reasons:
+
+   Why Tourism Works as Core Experience:
+
+     - Unique Niche: Cargo management is saturated; touring is fresh
+     - Visual Appeal: Scenic routes > boring cargo hauls
+     - Engaging Mechanics: Your interest point system is compelling
+     - Narrative Fit: Tours = people = stories = emotional connection
+     - Skill-Based: Route planning, satisfaction, optimization = mastery curve
+
+   Mind Map Analysis - Tours System:
+
+   You've designed a deep, interconnected system:
+
+   Core Loop:
+
+     - Discover islands via sea charts
+     - Identify interest points (Nature, Historical, Military)
+     - Design tours connecting interesting stops
+     - Optimize route for speed, fuel, satisfaction
+     - Execute tour (risks: weather, grounding, capsizing)
+     - Evaluate customer satisfaction → Rating → More passengers
+
+   Risk/Reward Balance:
+
+     - Faster routes = Lower fuel cost, higher rating, BUT less sightseeing
+     - Scenic routes = Higher satisfaction, BUT slower, more fuel
+     - Dangerous routes = Unique sights, BUT grounding/capsizing risk
+     - Long tours = More money, BUT more things can go wrong
+
+   This is Koster's "fun through mastery" perfectly applied. Players will spend hours optimizing tour routes!
+
+   Interest Points - Deep Dive Needed:
+
+   You mentioned three types: Nature, Historical, Military
+
+   Design Questions:
+
+     - How are they discovered?
+       - All marked on charts when purchased?
+       - Discovered through exploration?
+       - Unlock via research/stories?
+       A: Here comes the seachart mechanics in play. One of the main states of the game will be in the gothenburg harbour where we will also have the ability to choose headquarter location.
+       In the headquarter the planning of routes will take place on a physical map. The map have fog of war on it and areas will be unlocked through seacharts. (one scene could be that this takes place on board 
+       your ship with the map in center and the steering cabin being in the background). However some interest ponints should be public knowledge and displayed on the map but surrounded by fog due to no seachart available.
+     - What makes them mechanically different?
+       - Nature: Seasonal (aurora borealis in winter, nesting birds in spring)?
+       - Historical: Unlock stories/lore about archipelago?
+       - Military: Forts, ship wrecks, historical battles?
+       A: Yes these are valid points and I'm thinking that we will have an employee type of tour guide that will increase the satisfaction for the different points. This is connected to the knowledge skill
+     - Passenger preferences?
+       - Do different passenger types prefer different interests?
+       - Borgare (bourgeois) want comfort + history?
+       - Adel (nobility) want prestige + military heritage?
+       - Knegare (commoners) want affordable nature tours?
+       A: Good points and as you pointed out that some tend toward more interests - higher paying customers but with nature being the starting ground (easier access) but all should be having the interests just that its more common in the different types. 
+     - Depth vs. breadth?
+       - Many shallow points ("nice view") vs. fewer deep points (unlock multi-paragraph stories)?
+       A: Not sure what you're after here and will need to be explored further.
+     - Dynamic changes?
+       - Does a point's value change? (Lighthouse burns down? New statue erected?)
+       A: Yes these could be part of events in order to make the world more living.
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🎭 Passenger Types - Class System
+
+   Your mind map shows three tiers: Knegare → Borgare → Adel
+
+   Plus VIP system with historical personas (Oscar II mentioned - actual King of Sweden 1872-1907!)
+
+   Lens of Meaningful Choices:
+
+   Class-based passengers create strategic depth:
+
+   ┌──────────────┬─────────────┬──────────────────┬───────────────────────┬──────────────┐
+   │ Class        │ Knegare     │ Borgare          │ Adel                  │ VIP          │
+   ├──────────────┼─────────────┼──────────────────┼───────────────────────┼──────────────┤
+   │ Pay          │ Low         │ Medium           │ High                  │ Very High    │
+   ├──────────────┼─────────────┼──────────────────┼───────────────────────┼──────────────┤
+   │ Expectations │ Basic       │ Comfort          │ Luxury                │ Bespoke      │
+   ├──────────────┼─────────────┼──────────────────┼───────────────────────┼──────────────┤
+   │ Volume       │ Many        │ Some             │ Few                   │ Rare         │
+   ├──────────────┼─────────────┼──────────────────┼───────────────────────┼──────────────┤
+   │ Preferences  │ Nature, Fun │ History, Comfort │ Prestige, Exclusivity │ Custom tours │
+   └──────────────┴─────────────┴──────────────────┴───────────────────────┴──────────────┘
+
+   Strategic Decision:
+
+     - Volume strategy: Cheap tours, many knegare, low margins but reliable
+     - Premium strategy: Luxury tours, adel/borgare, high margins but picky
+     - VIP strategy: One-off custom tours for historical figures, huge payoff but risky
+
+   Traits (Food lover, Drinker):
+
+     - Do these affect tour planning? (Need to stock food/drink?)
+     - Or just affect satisfaction scores?
+     A: Yes this is part of building a successful touring company and part of the upgrades. Also havinga service employee to serve food and drinks etc.
+
+   Historical VIPs - Incredible Opportunity:
+
+   Imagine escorting King Oscar II on a royal tour!
+
+     - Scripted event or random?
+     - High stakes (fail = reputation loss)
+     - Historical accuracy (real places he visited?)
+     - Narrative moment (cutscene? Special dialogue?)
+     A: Unlocked through the prestige of the company but it is vital that this information is available to the player - maybe through headlines in newspaper etc?
+     Oscar II was an avid traveler throughout the western archipelago using his own ship Drott. He used to travel to Marstrand and surroundings which will be a key location in this game.
+     Maybe the player will have the ability to secure the contract to command the vessel for the king?
+
+   Other potential VIPs:
+
+     - Alfred Nobel (1833-1896) - inventor, industrialist
+     - August Strindberg (1849-1912) - famous playwright
+     - Selma Lagerlöf (1858-1940) - Nobel Prize author
+     - Foreign dignitaries visiting Sweden
+     A: Good choises and we will explore them further.
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🎨 Polish & Atmosphere - Your Mind Maps Show It
+
+   The level of detail in your mind maps (animated weather icons, boy shoutouts advertising tours, drag-to-check sightlines) shows you understand juice matters.
+
+   Atmospheric Touches:
+
+   From Passenger Mind Map:
+
+     - Posters in harbor advertising tours
+     - Couples shown as passenger types (visual clarity)
+     - Boy shoutouts when tour is advertised (charming, historical)
+     - People on docks waiting for tours (makes world feel alive)
+     - Animated weather icons (teaches at-a-glance)
+
+   From Tours Mind Map:
+
+     - Drag ship along route to check sightlines (intuitive UI)
+     - View distance lines (shows what passengers can see)
+     - Dotted sea lines (route visualization)
+     - Buoy checkpoints (physical navigation aids)
+     - Waves sound when placing buoys (audio feedback)
+     - Blinking, DingDing sound at busy checkpoints (attention grabber)
+
+   This is excellent UX design thinking. These aren't just features - they make the world feel real and responsive.
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🌊 Sea Charts + Grounding System - Risk/Reward Design
+
+   This mechanic ties everything together beautifully:
+
+   Chart Quality Ladder:
+
+   ┌────────────────┬────────────────┬─────────────────────────────────┬───────────────────────────────────────┐
+   │ Quality        │ Cost           │ Information                     │ Risk                                  │
+   ├────────────────┼────────────────┼─────────────────────────────────┼───────────────────────────────────────┤
+   │ Rumor          │ Cheap/Free     │ Island exists, rough location   │ High grounding risk, no depth markers │
+   ├────────────────┼────────────────┼─────────────────────────────────┼───────────────────────────────────────┤
+   │ Basic Chart    │ Medium         │ Accurate location, some hazards │ Moderate risk, basic depth info       │
+   ├────────────────┼────────────────┼─────────────────────────────────┼───────────────────────────────────────┤
+   │ Detailed Chart │ Expensive      │ Full hazards, depths, currents  │ Low risk, optimal routes shown        │
+   ├────────────────┼────────────────┼─────────────────────────────────┼───────────────────────────────────────┤
+   │ Naval Chart    │ Very Expensive │ Military-grade accuracy         │ Minimal risk, secret routes           │
+   └────────────────┴────────────────┴─────────────────────────────────┴───────────────────────────────────────┘
+
+   Grounding Consequences:
+
+   Lens of Challenge: Punishment should teach, not frustrate
+
+     - Minor grounding: Damage, repair cost, delay (teaches: plan better)
+     - Major grounding: Ship stuck, expensive tow, reputation loss (teaches: don't cut corners)
+     - Catastrophic: Ship loss, passengers endangered, bankruptcy risk (teaches: respect the sea)
+
+   Historical accuracy: Swedish archipelago has thousands of rocks/skerries - grounding was real danger!
+
+   Integration with Tours:
+
+     - Dangerous routes pass near hazards but have best views
+     - Safe routes are boring but reliable
+     - Chart quality determines if you even KNOW the danger exists
+
+   Player mastery arc:
+
+     - Early game: Buy basic charts, stick to safe routes
+     - Mid game: Risk dangerous routes with detailed charts
+     - Late game: KNOW the archipelago by heart, rely less on charts
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🔄 Route Intertwining - Two Gameplay Lines
+
+   You mentioned goods vs. people shipping, with "intertwining routes being the main mechanic."
+
+   Design Question: What does "intertwining" mean?
+
+   Option A: Shared Infrastructure
+
+     - Same ports serve both passengers and cargo
+     - Passenger demand driven by cargo economy (workers need transport to ports)
+     - Economic simulation ties them together
+
+   Option B: Route Optimization
+
+     - Can you combine passenger + cargo on same ship?
+     - Passenger ferry stops at island to also deliver mail/small cargo?
+     - Efficiency bonus for multi-purpose routes?
+
+   Option C: Narrative Intertwining
+
+     - Tourism growth brings cargo demand (tourists need hotels → construction materials)
+     - Cargo routes enable tourism (connect remote islands → tourists want to visit)
+
+   My Recommendation: Start with Option C for tourism-focused release
+
+     - Tourism success = islands develop = future cargo opportunities (DLC hook)
+     - Keep it simple: Tourism first, cargo expands the world later
+     A: Yes I agrre with Option C
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🎯 Critical Path to GDD
+
+   We now have enough detail to create a comprehensive Game Design Document. Here's what we've solidified:
+
+   Confirmed Design Pillars:
+
+     - Three-Act Life Story (1887-1947, age 20-80)
+       - Act 1: Beginnings + Romance (ETS2-style direct control)
+       - Act 2: Competition + Growth (Fleet management)
+       - Act 3: Legacy + Succession (High-level oversight)
+     - Tourism Focus (Goods DLC, International DLC later)
+       - Interest points (Nature, Historical, Military)
+       - Passenger classes (Knegare, Borgare, Adel, VIP)
+       - Route optimization and satisfaction systems
+     - Progressive Control Shift
+       - Start: Direct ship control
+       - Middle: Delegate to captains
+       - End: Strategic oversight
+     - Risk Systems
+       - Sea charts quality affects grounding risk
+       - Weather and seasons (winter challenge)
+       - Bankruptcy possible (somber ending)
+     - Historical Accuracy + Charm
+       - 1887 Gothenburg setting
+       - Real historical events (WWI, WWII)
+       - Historical VIP passengers
+       - Deathbed framing device
+     - Emotional Beats
+       - Opening: "Till havs" song, deathbed framing
+       - Act 1 climax: Wedding
+       - Ending: Photo wall of legacy, protagonist's death
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   ❓ Final Questions Before GDD Creation:
+
+     - Ship builder scope: Full custom vs. modular upgrades vs. preset ships?
+     - Wife depth: Active character with dialogue or narrative presence only?
+     - Interest points: How many per island? How detailed are they?
+     - Passenger traits: Gameplay impact or flavor?
+     - VIP events: Scripted story moments or emergent gameplay?
+     - Control scheme: Full simulation, accessible hybrid, or simplified?
+     - First playthrough length: Target 20-30 hours? 40-50 hours?
+
+   ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+   🚀 Ready to Formalize?
+
+   I believe we have enough to create a strong initial GDD. I can delegate to game-design-creator to produce:
+
+     - Core Vision Document (setting, pillars, fantasy)
+     - Systems Design (detailed mechanics for tours, passengers, progression)
+     - Narrative Structure (three-act breakdown with beats)
+     - Content Plan (islands, routes, interest points, characters)
+     - Technical Requirements (ties to PROJECT_CONTEXT.md)
+
+   Should I proceed with delegation, or do you want to explore any specific mechanic further first?
+
+   Your vision is cohesive and compelling - let's get it documented properly!
+---
+
+Remaining Implementation Questions:
+
+  - Physics model complexity: Arcade-style or realistic maritime physics?
+  A: Physics should be simpler more arcade-style due to camera perspective, but waves should have an impact.
+  - Input method: Keyboard + mouse? Controller support? Both?
+  A: Both
+  - Ship damage visualization: Visual model damage or just health bar?
+  A: It would be great to have visual damage but could increase scope dramatically - health values are vital and basic for further visuals later on.
+  - Passenger panic system: Do passengers react in real-time to your maneuvers?
+  A: Yes! this is a valid point to passengers comfort levels.
+  - Sea rescue mechanics: If another ship grounds, can you help (tow them off)?
+  A: Yes or take on the passengers / crew of that ship in order to help them. 
