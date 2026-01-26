@@ -17,8 +17,8 @@ def load_env():
 
 def make_request(method, issue_key, action='get', data=None):
     env = load_env()
-    creds = base64.b64encode(f"{env['JIRA_EMAIL']}:{env['JIRA_API_TOKEN']}".encode()).decode()
-    base = env['JIRA_BASE_URL']
+    creds = base64.b64encode(f"{env['ATLASSIAN_EMAIL']}:{env['ATLASSIAN_API_TOKEN']}".encode()).decode()
+    base = env['ATLASSIAN_BASE_URL']
     
     endpoints = {
         'get': f"/rest/api/3/issue/{issue_key}",

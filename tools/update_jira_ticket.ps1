@@ -53,7 +53,7 @@ function New-ADFDoc {
 Write-Host "🔄 Updating Jira ticket: $IssueKey" -ForegroundColor Cyan
 
 $env = Load-Env
-$creds = "$($env['JIRA_EMAIL']):$($env['JIRA_API_TOKEN'])"
+$creds = "$($env['ATLASSIAN_EMAIL']):$($env['ATLASSIAN_API_TOKEN'])"
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($creds)
 $base64 = [System.Convert]::ToBase64String($bytes)
 
@@ -95,7 +95,7 @@ $body = @{
 } | ConvertTo-Json -Depth 20
 
 # Update issue
-$url = "$($env['JIRA_BASE_URL'])/rest/api/3/issue/$IssueKey"
+$url = "$($env['ATLASSIAN_BASE_URL'])/rest/api/3/issue/$IssueKey"
 try {
     Invoke-RestMethod -Uri $url -Headers $headers -Method Put -Body $body
     Write-Host "`n✅ $IssueKey updated successfully!" -ForegroundColor Green
