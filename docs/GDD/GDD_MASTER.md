@@ -122,6 +122,8 @@ The game is framed as a **deathbed reflection**, with the Swedish folk song *"Ti
 
 ## High-Level Gameplay Loop
 
+![1769424774705](image/GDD_MASTER/1769424774705.png)
+
 ### The Core Loop (Session-to-Session)
 
 ```

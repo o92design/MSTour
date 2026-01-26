@@ -356,14 +356,16 @@ The Swedish folk song "Till havs" is the emotional anchor of MS Tour:
 
 **Lyrics** (excerpt):
 ```
-Till havs, till havs, till livets kamp och fara,
-Till ärans prål, till guld och gyllne skatt!
+Till havs, till havs, till storms, till djärv och jakt
+Till havs, till storms har man förakt
+Till havs!
 ```
 
 **Translation**:
 ```
-To the sea, to the sea, to life's struggle and danger,
-To honor's splendor, to gold and golden treasure!
+To the sea, to the sea, to the storm, to the bold and the hunt
+To the sea, to the storm one has contempt
+To the sea!
 ```
 
 *Full emotional design in [Framing Device] (to be created)*
