@@ -21,9 +21,9 @@
 Create a file: `C:\Dev\projects\MSTour\.env` (gitignored)
 
 ```env
-JIRA_EMAIL=your-email@example.com
-JIRA_API_TOKEN=your-api-token-here
-JIRA_BASE_URL=https://o92design.atlassian.net
+ATLASSIAN_EMAIL=your-email@example.com
+ATLASSIAN_API_TOKEN=your-api-token-here
+ATLASSIAN_BASE_URL=https://o92design.atlassian.net
 JIRA_PROJECT_KEY=MST
 ```
 
