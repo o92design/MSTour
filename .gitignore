@@ -46,3 +46,7 @@ assets/cache/
 # Environment variables
 .env
 .env.local
+
+# Python specific
+__pycache__/
+*.pyc
