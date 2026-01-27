@@ -100,15 +100,18 @@ This document defines specialized agents for delegating tasks within the MS Tour
 
 ### 6. Game Design Creator Agent
 **Name**: `game-design-creator`  
-**Specialization**: Formal game design documentation and specifications  
+**Specialization**: Formal game design documentation and specifications in Confluence  
 **Use for**:
-- Creating Game Design Documents (GDDs)
-- Writing feature specifications
+- Creating Game Design Documents (GDDs) in Confluence
+- Writing feature specifications as Confluence pages
 - Documenting game systems formally
 - Creating balance and tuning documents
 - Writing content specifications
 - UI/UX specifications
-- Maintaining design documentation
+- Maintaining design documentation in Confluence
+
+**Document Location**: Confluence Space "MS" → "MS Tour - Game Design Document"  
+**Legacy Docs**: `docs/GDD/` (archived, read-only)
 
 **Document Types**:
 - Feature specifications
@@ -119,15 +122,15 @@ This document defines specialized agents for delegating tasks within the MS Tour
 - UI/UX specifications
 
 **Example prompts**:
-- "Create a formal specification for the cargo trading system"
-- "Document the ship upgrade progression with formulas and values"
-- "Write a feature spec for weather effects on shipping routes"
-- "Create a balance document for the game economy"
+- "Create a Confluence page for the cargo trading system specification"
+- "Document the ship upgrade progression in Confluence with formulas and values"
+- "Write a feature spec page for weather effects on shipping routes"
+- "Create a balance document in Confluence for the game economy"
 
 **Workflow with Consultant**:
 1. Use `game-design-consultant` to explore and discuss ideas
-2. Use `game-design-creator` to formalize and document decisions
-3. Creator produces implementation-ready specifications
+2. Use `game-design-creator` to formalize and document decisions in Confluence
+3. Creator produces implementation-ready specifications as Confluence pages
 
 ---
 
@@ -270,14 +273,14 @@ Use the task tool with appropriate agent_type:
 ### Game Design Workflow
 1. **Explore Ideas**: game-design-consultant discusses mechanics, balance, player experience
 2. **Make Decisions**: Collaborate with consultant to evaluate options
-3. **Document Design**: game-design-creator formalizes specifications
+3. **Document Design**: game-design-creator formalizes specifications in Confluence
 4. **Review & Iterate**: Refine design based on review
-5. **Implementation**: Pass specs to game-agent/engine-agent
+5. **Implementation**: Pass Confluence specs to game-agent/engine-agent
 6. **Playtest & Balance**: Test and iterate using consultant feedback
 
 **Agent Separation**:
 - **game-design-consultant**: Explores "what should we design?"
-- **game-design-creator**: Documents "here's what we decided"
+- **game-design-creator**: Documents "here's what we decided" (in Confluence)
 - **game-agent**: Implements "here's how it works in code"
 - **docs-agent**: Documents "here's how to use the code"
 
