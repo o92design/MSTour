@@ -14,13 +14,17 @@ Welcome to the MS Tour documentation! This guide will help you navigate all avai
 5. **[COPILOT_QUICKREF.md](COPILOT_QUICKREF.md)** - Quick reference for daily development
 6. **[AGENTS.md](AGENTS.md)** - Custom agent definitions for task delegation
 
+### Game Design Documentation
+7. **Confluence Space "MS"** - Active GDD location (primary)
+8. **[GDD/](GDD/)** - Archived GDD documentation (historical reference only)
+
 ### Workflow & Process
-7. **[JIRA_INTEGRATION.md](JIRA_INTEGRATION.md)** - Jira ticket management and workflows
-8. **[../.github/copilot-instructions.md](../.github/copilot-instructions.md)** - GitHub Copilot configuration
+9. **[JIRA_INTEGRATION.md](JIRA_INTEGRATION.md)** - Jira ticket management and workflows
+10. **[../.github/copilot-instructions.md](../.github/copilot-instructions.md)** - GitHub Copilot configuration
 
 ### Project History
-9. **[SETUP_SUMMARY.md](SETUP_SUMMARY.md)** - Phase 1 complete setup summary
-10. **[jira_updates/](jira_updates/)** - Jira ticket update archives
+11. **[SETUP_SUMMARY.md](SETUP_SUMMARY.md)** - Phase 1 complete setup summary
+12. **[jira_updates/](jira_updates/)** - Jira ticket update archives
 
 ---
 
@@ -56,6 +60,12 @@ Welcome to the MS Tour documentation! This guide will help you navigate all avai
 **Audience**: All team members  
 **Contents**: Ticket structure, update templates, workflows, MST-2 and MST-3 details
 
+### GDD (Archived)
+**Purpose**: Historical game design documentation  
+**Audience**: Reference only - see Confluence for active docs  
+**Contents**: Legacy GDD content (pre-January 2026), see [GDD/GDD_README.md](GDD/GDD_README.md)  
+**Active Location**: Confluence Space "MS" → "MS Tour - Game Design Document"
+
 ### SETUP_SUMMARY.md
 **Purpose**: Document Phase 1 completion  
 **Audience**: Team leads, project managers, new developers  
@@ -78,9 +88,10 @@ Welcome to the MS Tour documentation! This guide will help you navigate all avai
 
 ### "I'm implementing a feature"
 1. Check [AGENTS.md](AGENTS.md) - Delegate to specialized agents
-2. Use [COPILOT_QUICKREF.md](COPILOT_QUICKREF.md) - Code patterns
-3. Refer to [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) - Design principles
-4. Update [JIRA_INTEGRATION.md](JIRA_INTEGRATION.md) - Track progress
+2. Refer to Confluence GDD - Design specifications
+3. Use [COPILOT_QUICKREF.md](COPILOT_QUICKREF.md) - Code patterns
+4. Refer to [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) - Design principles
+5. Update [JIRA_INTEGRATION.md](JIRA_INTEGRATION.md) - Track progress
 
 ### "I'm updating Jira"
 1. Open [JIRA_INTEGRATION.md](JIRA_INTEGRATION.md) - Templates and workflows
@@ -173,11 +184,17 @@ docs/
 ├── AGENTS.md                    # Agent definitions
 ├── JIRA_INTEGRATION.md          # Jira workflows
 ├── SETUP_SUMMARY.md             # Phase 1 summary
+├── GDD/                         # Archived game design docs (see Confluence for active)
 └── jira_updates/                # Jira update archives
     └── MST-2_update.md          # MST-2 completion
 
 ../.github/
-└── copilot-instructions.md      # GitHub Copilot config
+├── copilot-instructions.md      # GitHub Copilot config
+├── agents/                      # Custom agent definitions
+│   └── game-design-creator.agent.md  # GDD documentation agent
+└── skills/                      # Custom skills
+    └── confluence-edit/         # Confluence integration skill
+        └── SKILL.md
 ```
 
 ---
@@ -192,6 +209,12 @@ A: [COPILOT_QUICKREF.md](COPILOT_QUICKREF.md) has patterns, [PROJECT_CONTEXT.md]
 
 **Q: How do I use agents?**  
 A: Read [AGENTS.md](AGENTS.md) for complete guide with examples.
+
+**Q: Where's the Game Design Document?**  
+A: Active GDD is in Confluence Space "MS" → "MS Tour - Game Design Document". The [GDD/](GDD/) folder contains archived historical docs.
+
+**Q: How do I create GDD documentation?**  
+A: Use the game-design-creator agent with the confluence-edit skill. See [AGENTS.md](AGENTS.md) for details.
 
 **Q: Where's the API reference?**  
 A: Currently in header files (engine/include/*.h). API reference doc is planned.
@@ -216,9 +239,10 @@ A: [BUILD.md](BUILD.md) has detailed troubleshooting, [COPILOT_QUICKREF.md](COPI
 | AGENTS | ✅ Complete | 2026-01-24 | 100% |
 | JIRA_INTEGRATION | ✅ Complete | 2026-01-24 | 100% |
 | SETUP_SUMMARY | ✅ Complete | 2026-01-24 | 100% |
+| GDD | 📦 Archived | 2026-01-26 | See Confluence |
 
 ---
 
-**Last Updated**: 2026-01-24  
+**Last Updated**: 2026-01-26  
 **Maintained By**: MS Tour Development Team  
 **Questions?**: Check relevant doc or ask in team chat

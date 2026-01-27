@@ -1,8 +1,19 @@
 # MS TOUR - Game Design Documentation
 
-## Welcome to the MS Tour GDD
+> **⚠️ ARCHIVED CONTENT - READ ONLY**  
+> **As of January 2026, all active GDD documentation has moved to Confluence.**  
+> This directory is maintained for historical reference only.  
+> **Active GDD Location:** Confluence Space "MS" → "MS Tour - Game Design Document"
 
-This directory contains the comprehensive, modular Game Design Document (GDD) for **MS Tour**, a shipping company management simulation set in the Gothenburg archipelago (1887-1950s).
+---
+
+## Welcome to the MS Tour GDD (Archived)
+
+This directory contains the historical Game Design Document (GDD) for **MS Tour**, a shipping company management simulation set in the Gothenburg archipelago (1887-1950s).
+
+**Current Documentation:** All new and updated design documentation is now maintained in Confluence for better collaboration, version control, and accessibility. Please refer to the Confluence space for the latest information.
+
+**This Archive:** The content here represents the design state as of January 2026 and serves as a reference for historical context.
 
 ---
 
