@@ -3,7 +3,7 @@
 > **⚠️ ARCHIVED CONTENT - READ ONLY**  
 > **As of January 2026, all active GDD documentation has moved to Confluence.**  
 > This directory is maintained for historical reference only.  
-> **Active GDD Location:** Confluence Space "MS" → "MS Tour - Game Design Document"
+> **Active GDD Location:** Confluence Space "MS" → "GDD Master"
 
 ---
 

@@ -64,7 +64,7 @@ Welcome to the MS Tour documentation! This guide will help you navigate all avai
 **Purpose**: Historical game design documentation  
 **Audience**: Reference only - see Confluence for active docs  
 **Contents**: Legacy GDD content (pre-January 2026), see [GDD/GDD_README.md](GDD/GDD_README.md)  
-**Active Location**: Confluence Space "MS" → "MS Tour - Game Design Document"
+**Active Location**: Confluence Space "MS" → "GDD Master"
 
 ### SETUP_SUMMARY.md
 **Purpose**: Document Phase 1 completion  
@@ -211,7 +211,7 @@ A: [COPILOT_QUICKREF.md](COPILOT_QUICKREF.md) has patterns, [PROJECT_CONTEXT.md]
 A: Read [AGENTS.md](AGENTS.md) for complete guide with examples.
 
 **Q: Where's the Game Design Document?**  
-A: Active GDD is in Confluence Space "MS" → "MS Tour - Game Design Document". The [GDD/](GDD/) folder contains archived historical docs.
+A: Active GDD is in Confluence Space "MS" → "GDD Master". The [GDD/](GDD/) folder contains archived historical docs.
 
 **Q: How do I create GDD documentation?**  
 A: Use the game-design-creator agent with the confluence-edit skill. See [AGENTS.md](AGENTS.md) for details.

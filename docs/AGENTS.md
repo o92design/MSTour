@@ -110,7 +110,7 @@ This document defines specialized agents for delegating tasks within the MS Tour
 - UI/UX specifications
 - Maintaining design documentation in Confluence
 
-**Document Location**: Confluence Space "MS" → "MS Tour - Game Design Document"  
+**Document Location**: Confluence Space "MS" → "GDD Master"  
 **Legacy Docs**: `docs/GDD/` (archived, read-only)
 
 **Document Types**:

@@ -179,7 +179,7 @@ Performance considerations and constraints.
 **Primary Location**: Confluence Space "MS"
 
 **Confluence Page Hierarchy:**
-- Root: "MS Tour - Game Design Document"
+- Root: "GDD Master"
   - `Systems/` - System specifications (child pages)
   - `Features/` - Feature specifications (child pages)
   - `Content/` - Content design: islands, cargo, etc. (child pages)
@@ -299,7 +299,7 @@ purchase fuel at ports, and consider fuel efficiency when planning routes.
 
 **This would be created as a Confluence page:**
 - Title: "Ship Fuel System"
-- Parent: "MS Tour - Game Design Document > Features"
+- Parent: "GDD Master > Features"
 - Content: The markdown above (auto-converted to Confluence format)
 
 **System Design Excerpt:**
@@ -325,7 +325,7 @@ Allow players to define, save, and execute shipping routes efficiently.
 
 **This would be created as a Confluence page:**
 - Title: "Route Planning System"  
-- Parent: "MS Tour - Game Design Document > Systems"
+- Parent: "GDD Master > Systems"
 - Content: The markdown above (auto-converted to Confluence format)
 
 ## Your Mission

@@ -26,7 +26,7 @@ Located in `tools/` directory:
 Organize GDD pages in the following hierarchy:
 
 ```
-MS Tour - Game Design Document (Root/Parent Page)
+GDD Master (Root/Parent Page)
 ├── Systems
 │   ├── Ship Management System
 │   ├── Route Planning System
@@ -66,7 +66,7 @@ Search for a page by title:
 
 ```bash
 cd tools
-py confluence_fetch.py find "MS Tour - Game Design Document"
+py confluence_fetch.py find "GDD Master"
 ```
 
 This returns the page ID needed for creating child pages.
@@ -166,7 +166,7 @@ html = markdown_to_confluence_storage("# Title\n\nContent...")
 
 1. **Determine Parent Page**
    ```bash
-   py confluence_fetch.py find "MS Tour - Game Design Document"
+   py confluence_fetch.py find "GDD Master"
    # Note the page ID (e.g., 123456)
    ```
 
@@ -227,7 +227,7 @@ html = markdown_to_confluence_storage("# Title\n\nContent...")
 ### Page Hierarchy
 
 - Always specify parent page when creating new pages
-- Root GDD page: "MS Tour - Game Design Document"
+- Root GDD page: "GDD Master"
 - Maintain consistent structure matching the file-based organization
 
 ### Temporary Files

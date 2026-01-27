@@ -124,7 +124,7 @@ audit_pages.bat "GDD Master" "Core Gameplay Loop"
 
 ### Confluence Hierarchy
 ```
-MS Tour - Game Design Document (Master)
+GDD Master (Master)
 ├── Core Gameplay Loop (Child - single source)
 ├── Ship Management System (Child - single source)
 ├── Route Planning System (Child - single source)
