@@ -32,7 +32,7 @@ def get_auth_header():
     from base64 import b64encode
     
     if not CONFLUENCE_EMAIL or not CONFLUENCE_TOKEN:
-        print("❌ Missing credentials. Set ATLASSIAN_EMAIL and ATLASSIAN_API_TOKEN in .env")
+        print("[ERROR] Missing credentials. Set ATLASSIAN_EMAIL and ATLASSIAN_API_TOKEN in .env")
         sys.exit(1)
     
     auth_string = f"{CONFLUENCE_EMAIL}:{CONFLUENCE_TOKEN}"
@@ -57,7 +57,7 @@ def get_page(page_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to fetch page: {e}")
+        print(f"[ERROR] Failed to fetch page: {e}")
         return None
 
 def find_page_by_title(title):
@@ -80,13 +80,13 @@ def find_page_by_title(title):
         
         if data['results']:
             page = data['results'][0]
-            print(f"✅ Found page: '{page['title']}' (ID: {page['id']})")
+            print(f"[OK] Found page: '{page['title']}' (ID: {page['id']})")
             return page
         else:
-            print(f"❌ No page found with title: '{title}'")
+            print(f"[ERROR] No page found with title: '{title}'")
             return None
     except requests.exceptions.RequestException as e:
-        print(f"❌ Search failed: {e}")
+        print(f"[ERROR] Search failed: {e}")
         return None
 
 def confluence_storage_to_markdown(storage_text):
@@ -130,7 +130,7 @@ def get_page_content(page_identifier):
         markdown_content = confluence_storage_to_markdown(storage_content)
         return markdown_content
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to fetch page content: {e}")
+        print(f"[ERROR] Failed to fetch page content: {e}")
         return None
 
 def create_page(title, content, parent_id):
@@ -160,10 +160,10 @@ def create_page(title, content, parent_id):
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
         result = response.json()
-        print(f"✅ Created page: '{title}' (ID: {result['id']})")
+        print(f"[OK] Created page: '{title}' (ID: {result['id']})")
         return result
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to create page: {e}")
+        print(f"[ERROR] Failed to create page: {e}")
         if hasattr(e, 'response') and e.response:
             print(f"   Response: {e.response.text}")
         return None
@@ -198,24 +198,130 @@ def update_page(page_id, title, content, current_version):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"❌ Failed to update page: {e}")
+        print(f"[ERROR] Failed to update page: {e}")
         if hasattr(e, 'response') and e.response:
             print(f"   Response: {e.response.text}")
         return None
 
+def list_pages_in_space():
+    """List all pages in the MS space"""
+    url = f"{CONFLUENCE_BASE_URL}/wiki/rest/api/content"
+    headers = {
+        'Authorization': get_auth_header(),
+        'Accept': 'application/json'
+    }
+    params = {
+        'spaceKey': CONFLUENCE_SPACE_KEY,
+        'expand': 'version,ancestors',
+        'limit': 100
+    }
+    
+    try:
+        response = requests.get(url, params=params, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        return data['results']
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to list pages: {e}")
+        return []
+
+def get_child_pages(parent_id):
+    """Get child pages of a parent page"""
+    url = f"{CONFLUENCE_BASE_URL}/wiki/rest/api/content/{parent_id}/child/page"
+    headers = {
+        'Authorization': get_auth_header(),
+        'Accept': 'application/json'
+    }
+    params = {
+        'expand': 'version',
+        'limit': 100
+    }
+    
+    try:
+        response = requests.get(url, params=params, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        return data['results']
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to get child pages: {e}")
+        return []
+
 if __name__ == "__main__":
+    import sys
+    import io
+    
+    # Force UTF-8 output on Windows
+    if sys.platform == 'win32':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    
     if len(sys.argv) < 2:
-        print("Usage: python confluence_fetch.py <page-id-or-title>")
+        print("Usage:")
+        print("  python confluence_fetch.py <command> [args]")
+        print("\nCommands:")
+        print("  get <page-id-or-title>  - Fetch page content as markdown")
+        print("  find <title>             - Find page by title and show ID")
+        print("  list                     - List all pages in space")
+        print("  children <page-id>       - List child pages of a parent")
         print("\nExamples:")
-        print("  python confluence_fetch.py 123456789")
-        print("  python confluence_fetch.py 'Game Design Document'")
+        print("  python confluence_fetch.py get 'Game Design Document'")
+        print("  python confluence_fetch.py find 'Ship Fuel System'")
+        print("  python confluence_fetch.py list")
+        print("  python confluence_fetch.py children 123456")
         sys.exit(1)
     
-    page_identifier = sys.argv[1]
-    markdown = get_page_content(page_identifier)
+    command = sys.argv[1].lower()
     
-    if markdown:
-        print(markdown)
+    if command == "get":
+        if len(sys.argv) < 3:
+            print("[ERROR] Usage: python confluence_fetch.py get <page-id-or-title>")
+            sys.exit(1)
+        page_identifier = sys.argv[2]
+        markdown = get_page_content(page_identifier)
+        if markdown:
+            print(markdown)
+        else:
+            print("[ERROR] Failed to fetch page content")
+            sys.exit(1)
+    
+    elif command == "find":
+        if len(sys.argv) < 3:
+            print("[ERROR] Usage: python confluence_fetch.py find <title>")
+            sys.exit(1)
+        title = sys.argv[2]
+        page = find_page_by_title(title)
+        if page:
+            print(f"\nPage ID: {page['id']}")
+            print(f"Title: {page['title']}")
+            print(f"Version: {page['version']['number']}")
+        sys.exit(0 if page else 1)
+    
+    elif command == "list":
+        pages = list_pages_in_space()
+        if pages:
+            print(f"\n[OK] Found {len(pages)} pages in {CONFLUENCE_SPACE_KEY} space:\n")
+            for page in pages:
+                ancestors = page.get('ancestors', [])
+                indent = "  " * len(ancestors)
+                print(f"{indent}* {page['title']} (ID: {page['id']})")
+        else:
+            print("[ERROR] No pages found or failed to fetch")
+        sys.exit(0)
+    
+    elif command == "children":
+        if len(sys.argv) < 3:
+            print("[ERROR] Usage: python confluence_fetch.py children <page-id>")
+            sys.exit(1)
+        parent_id = sys.argv[2]
+        children = get_child_pages(parent_id)
+        if children:
+            print(f"\n[OK] Found {len(children)} child pages:\n")
+            for child in children:
+                print(f"  * {child['title']} (ID: {child['id']})")
+        else:
+            print("[ERROR] No child pages found")
+        sys.exit(0)
+    
     else:
-        print("❌ Failed to fetch page content")
+        print(f"[ERROR] Unknown command: {command}")
+        print("Use: get, find, list, or children")
         sys.exit(1)
