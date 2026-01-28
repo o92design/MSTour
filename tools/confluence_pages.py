@@ -30,6 +30,7 @@ GDD_PAGES = {
     
     # Narrative
     'Three-Act Structure': 851973,
+    'Emotional Core & Setting': 2097175,
     
     # Folder pages (if needed)
     'Systems': 950288,
