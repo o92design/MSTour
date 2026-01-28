@@ -20,6 +20,8 @@ Before using this skill, ensure:
 Located in `tools/` directory:
 - **`confluence_fetch.py`**: Read and search Confluence pages
 - **`confluence_push.py`**: Create and update Confluence pages
+- **`confluence_pages.py`**: Centralized registry of GDD page IDs and titles
+- **`confluence_update_links.py`**: Automatically add internal page links to existing pages
 
 ## Confluence Space Structure
 
@@ -124,7 +126,75 @@ cd tools
 py confluence_fetch.py get <page_id_or_title>
 ```
 
+### 6. Update Internal Page Links
+
+Automatically add Confluence internal links to pages that reference other GDD pages:
+
+```bash
+cd tools
+# Update a single page (dry run first)
+py confluence_update_links.py <page_id> --dry-run
+
+# Apply the update
+py confluence_update_links.py <page_id>
+
+# Update by page title
+py confluence_update_links.py --title "GDD Index"
+
+# Update all known pages in the registry
+py confluence_update_links.py --all
+```
+
+**How it works:**
+- Scans page content for references to other GDD pages (e.g., "GDD Master", "Core Gameplay Loop")
+- Converts plain text references to Confluence internal page links
+- Uses the centralized page registry in `confluence_pages.py`
+- Preserves existing formatting (bold, lists, etc.)
+
+**When to use:**
+- After creating new pages that reference existing pages
+- After migrating markdown files with cross-references
+- When page references are plain text instead of links
+- To maintain consistent cross-referencing across all GDD pages
+
 ## Python Script Reference
+
+### confluence_pages.py - Page Registry
+
+**Purpose**: Centralized mapping of GDD page titles to Confluence page IDs
+
+**get_page_id(page_title)**: Get page ID by title
+```py
+page_id = get_page_id("GDD Master")
+# Returns: 393217
+```
+
+**get_page_url(page_title_or_id)**: Get full Confluence URL
+```py
+url = get_page_url("GDD Master")
+# Returns: https://o92design.atlassian.net/wiki/spaces/MS/pages/393217
+```
+
+**get_canonical_title(page_title)**: Resolve aliases to canonical titles
+```py
+canonical = get_canonical_title("Ship Direct Control")
+# Returns: "Ship Control"
+```
+
+**get_all_pages()**: Get all known pages including aliases
+```py
+all_pages = get_all_pages()
+# Returns: {"GDD Master": 393217, "Ship Control": 1343506, ...}
+```
+
+**Updating the registry**: When you create new GDD pages, add them to `GDD_PAGES` dict in `confluence_pages.py`:
+```py
+GDD_PAGES = {
+    'GDD Master': 393217,
+    'Ship Fuel System': 1234567,  # <- Add new pages here
+    # ...
+}
+```
 
 ### confluence_fetch.py Functions
 
@@ -160,6 +230,32 @@ html = markdown_to_confluence_storage("# Title\n\nContent...")
 # Returns HTML in Confluence storage format
 ```
 
+### confluence_update_links.py Functions
+
+**add_links_to_html(html_content)**: Add Confluence links to HTML content
+```py
+updated_html = add_links_to_html(html_content)
+# Converts text references to Confluence internal links
+```
+
+**update_page_links(page_id, page_title, dry_run)**: Update a single page with links
+```py
+success = update_page_links(1703949, "GDD Index", dry_run=True)
+# Preview changes without applying
+```
+
+**update_multiple_pages(page_ids, dry_run)**: Update multiple pages
+```py
+success_count = update_multiple_pages([1703949, 1605636, 1671171])
+# Returns number of successfully updated pages
+```
+
+**update_all_known_pages(dry_run)**: Update all pages in registry
+```py
+success_count = update_all_known_pages(dry_run=False)
+# Updates all pages listed in confluence_pages.py
+```
+
 ## Workflow for Game Design Documentation
 
 ### Creating a New GDD Section
@@ -187,6 +283,13 @@ html = markdown_to_confluence_storage("# Title\n\nContent...")
    ```bash
    del temp_gdd_content.md
    ```
+
+6. **Add Internal Links** (recommended after creation)
+   ```bash
+   py confluence_update_links.py <new_page_id>
+   ```
+   
+   This automatically converts any references to other GDD pages into Confluence internal links.
 
 ### Updating Existing GDD Content
 
@@ -216,6 +319,11 @@ html = markdown_to_confluence_storage("# Title\n\nContent...")
    del temp_update.md
    ```
 
+6. **Update Links** (if new page references were added)
+   ```bash
+   py confluence_update_links.py <page_id>
+   ```
+
 ## Important Notes
 
 ### Markdown to Confluence Conversion
@@ -229,6 +337,23 @@ html = markdown_to_confluence_storage("# Title\n\nContent...")
 - Always specify parent page when creating new pages
 - Root GDD page: "GDD Master"
 - Maintain consistent structure matching the file-based organization
+
+### Page Registry (`confluence_pages.py`)
+
+- Centralized mapping of page titles to IDs
+- **Must be updated** when new pages are created
+- Used by link updater and other tools
+- Edit `GDD_PAGES` dict to add new pages
+- Add aliases in `PAGE_ALIASES` for alternative names
+
+**Example update:**
+```py
+# In confluence_pages.py
+GDD_PAGES = {
+    'GDD Master': 393217,
+    'Ship Fuel System': 1234567,  # <- Add your new page
+}
+```
 
 ### Temporary Files
 
@@ -258,6 +383,9 @@ cd tools
 # Test connection
 py confluence_push.py test
 
+# View page registry
+py confluence_pages.py list
+
 # Find page by title
 py confluence_fetch.py find "Page Title"
 
@@ -272,6 +400,18 @@ py confluence_push.py push <file> --page-id <id>
 
 # Update page (confirm)
 py confluence_push.py push <file> --page-id <id> --confirm
+
+# Add internal links to page (dry run)
+py confluence_update_links.py <page_id> --dry-run
+
+# Add internal links to page
+py confluence_update_links.py <page_id>
+
+# Add links to page by title
+py confluence_update_links.py --title "Page Title"
+
+# Add links to all known pages
+py confluence_update_links.py --all
 ```
 
 ## Integration with game-design-creator Agent
@@ -283,9 +423,23 @@ When the game-design-creator agent uses this skill:
 3. **Maintain same structure**, just in Confluence hierarchy
 4. **Use temporary files** as intermediary for content transfer
 5. **Always verify** page creation/update succeeded before reporting completion
+6. **Update page registry** in `confluence_pages.py` after creating new pages
+7. **Run link updater** after creating/updating pages with cross-references
 
 The agent should:
 - Ask for parent page confirmation before creating new pages
 - Show Confluence URLs after page creation
 - Handle errors gracefully (auth, network, page not found)
 - Clean up temporary files automatically
+- Add newly created pages to `confluence_pages.py`
+- Run `confluence_update_links.py` to add internal links automatically
+
+### Typical Workflow
+
+1. Create new GDD page in Confluence
+2. Add page mapping to `confluence_pages.py`
+3. Commit the registry update: `git add tools/confluence_pages.py && git commit -m "Add <Page Name> to registry"`
+4. Run link updater on new page: `py confluence_update_links.py --title "<Page Name>"`
+5. Optionally update all pages: `py confluence_update_links.py --all`
+
+This ensures all GDD pages have proper cross-references and the registry stays up-to-date.
