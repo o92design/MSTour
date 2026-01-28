@@ -13,7 +13,7 @@ audit_pages.bat "Page Title 1" "Page Title 2"
 
 **Cross-platform (Python):**
 ```bash
-python confluence_compare.py "Page Title 1" "Page Title 2"
+py confluence_compare.py "Page Title 1" "Page Title 2"
 ```
 
 ### Example
@@ -140,12 +140,12 @@ GDD Master (Master)
 
 ### Unicode/Encoding Errors
 - Use `audit_pages.bat` on Windows (handles encoding)
-- Or run Python with: `python -X utf8 confluence_compare.py ...`
+- Or run Python with: `py -X utf8 confluence_compare.py ...`
 
 ### Empty Output Files
 - Check Confluence API credentials
 - Verify network connectivity
-- Try: `python tools/confluence_fetch.py test`
+- Try: `py tools/confluence_fetch.py test`
 
 ## Configuration
 
@@ -171,6 +171,6 @@ Potential additions:
 **Questions?** See individual tool help:
 ```bash
 audit_pages.bat
-python confluence_compare.py
-python tools/confluence_audit.py
+py confluence_compare.py
+py tools/confluence_audit.py
 ```

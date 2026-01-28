@@ -72,7 +72,7 @@ set OUTPUT_PAGE2=audit_output\%SAFE_PAGE2%.md
 set OUTPUT_REPORT=audit_output\audit_comparison_%TIMESTAMP%.txt
 
 echo [Step 1/3] Fetching "%PAGE1%"...
-python tools\confluence_fetch.py get "%PAGE1%" > "%OUTPUT_PAGE1%" 2>&1
+py tools\confluence_fetch.py get "%PAGE1%" > "%OUTPUT_PAGE1%" 2>&1
 if errorlevel 1 (
     echo ERROR: Failed to fetch "%PAGE1%"
     type "%OUTPUT_PAGE1%"
@@ -82,7 +82,7 @@ echo   Saved to: %OUTPUT_PAGE1%
 
 echo.
 echo [Step 2/3] Fetching "%PAGE2%"...
-python tools\confluence_fetch.py get "%PAGE2%" > "%OUTPUT_PAGE2%" 2>&1
+py tools\confluence_fetch.py get "%PAGE2%" > "%OUTPUT_PAGE2%" 2>&1
 if errorlevel 1 (
     echo ERROR: Failed to fetch "%PAGE2%"
     type "%OUTPUT_PAGE2%"
@@ -92,7 +92,7 @@ echo   Saved to: %OUTPUT_PAGE2%
 
 echo.
 echo [Step 3/3] Running DRY audit...
-python tools\confluence_audit.py "%PAGE1%" "%PAGE2%" > "%OUTPUT_REPORT%" 2>&1
+py tools\confluence_audit.py "%PAGE1%" "%PAGE2%" > "%OUTPUT_REPORT%" 2>&1
 if errorlevel 1 (
     echo WARNING: Audit completed with warnings
 ) else (

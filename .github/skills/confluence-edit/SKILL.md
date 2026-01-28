@@ -129,25 +129,25 @@ py confluence_fetch.py get <page_id_or_title>
 ### confluence_fetch.py Functions
 
 **get_page(page_id)**: Fetch page details
-```python
+```py
 page = get_page("123456")
 # Returns: {title, version, body, etc.}
 ```
 
 **find_page_by_title(title)**: Search by title
-```python
+```py
 page = find_page_by_title("Ship Fuel System")
 # Returns: {id, title, version}
 ```
 
 **create_page(title, content, parent_id)**: Create new page
-```python
+```py
 result = create_page("New Feature", html_content, "123456")
 # content must be in Confluence storage format (HTML)
 ```
 
 **update_page(page_id, title, content, current_version)**: Update existing page
-```python
+```py
 result = update_page("789", "Feature Name", html_content, 5)
 # Increments version automatically
 ```
@@ -155,7 +155,7 @@ result = update_page("789", "Feature Name", html_content, 5)
 ### confluence_push.py Functions
 
 **markdown_to_confluence_storage(markdown_text)**: Convert markdown to HTML
-```python
+```py
 html = markdown_to_confluence_storage("# Title\n\nContent...")
 # Returns HTML in Confluence storage format
 ```
