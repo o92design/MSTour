@@ -256,24 +256,24 @@ if __name__ == "__main__":
     
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python confluence_fetch.py <command> [args]")
+        print("  py confluence_fetch.py <command> [args]")
         print("\nCommands:")
         print("  get <page-id-or-title>  - Fetch page content as markdown")
         print("  find <title>             - Find page by title and show ID")
         print("  list                     - List all pages in space")
         print("  children <page-id>       - List child pages of a parent")
         print("\nExamples:")
-        print("  python confluence_fetch.py get 'Game Design Document'")
-        print("  python confluence_fetch.py find 'Ship Fuel System'")
-        print("  python confluence_fetch.py list")
-        print("  python confluence_fetch.py children 123456")
+        print("  py confluence_fetch.py get 'Game Design Document'")
+        print("  py confluence_fetch.py find 'Ship Fuel System'")
+        print("  py confluence_fetch.py list")
+        print("  py confluence_fetch.py children 123456")
         sys.exit(1)
     
     command = sys.argv[1].lower()
     
     if command == "get":
         if len(sys.argv) < 3:
-            print("[ERROR] Usage: python confluence_fetch.py get <page-id-or-title>")
+            print("[ERROR] Usage: py confluence_fetch.py get <page-id-or-title>")
             sys.exit(1)
         page_identifier = sys.argv[2]
         markdown = get_page_content(page_identifier)
@@ -285,7 +285,7 @@ if __name__ == "__main__":
     
     elif command == "find":
         if len(sys.argv) < 3:
-            print("[ERROR] Usage: python confluence_fetch.py find <title>")
+            print("[ERROR] Usage: py confluence_fetch.py find <title>")
             sys.exit(1)
         title = sys.argv[2]
         page = find_page_by_title(title)
@@ -309,7 +309,7 @@ if __name__ == "__main__":
     
     elif command == "children":
         if len(sys.argv) < 3:
-            print("[ERROR] Usage: python confluence_fetch.py children <page-id>")
+            print("[ERROR] Usage: py confluence_fetch.py children <page-id>")
             sys.exit(1)
         parent_id = sys.argv[2]
         children = get_child_pages(parent_id)
