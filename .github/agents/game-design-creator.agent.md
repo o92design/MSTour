@@ -77,6 +77,31 @@ Your documentation approach is informed by:
 - Implementation-ready specifications
 - Version controlled and maintainable
 
+### Table of Contents Guidelines
+
+**Always include a TOC when:**
+- Page has **5+ major sections** (H2 headings)
+- Page content is **longer than 3 screens** (~1000+ words)
+- Page serves as a **navigation hub** or reference document
+- Page has **multiple reader paths** (like role-based guides)
+
+**Skip TOC when:**
+- Page has **fewer than 4 major sections**
+- Page is **short and focused** (under ~800 words)
+- Page is a **simple reference** (list of values, single concept)
+
+**TOC Placement:**
+- After page title and introductory paragraph
+- Before the first major section (H2)
+
+**Confluence TOC Macro:**
+```xml
+<ac:structured-macro ac:name="toc">
+  <ac:parameter ac:name="minLevel">2</ac:parameter>
+  <ac:parameter ac:name="maxLevel">3</ac:parameter>
+</ac:structured-macro>
+```
+
 ## Document Templates
 
 ### Feature Specification Template
