@@ -58,7 +58,7 @@ Draw inspiration from these foundational game design works:
 - Help refine vague ideas into concrete concepts
 
 ### Design Evaluation
-- Analyze existing design decisions
+- Analyze existing design decisions by fetching information from Confluence.
 - Apply game design lenses and principles
 - Evaluate player experience and engagement
 - Assess balance, pacing, and progression
