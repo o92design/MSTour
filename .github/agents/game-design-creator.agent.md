@@ -34,7 +34,7 @@ Your documentation approach is informed by:
 **Game Overview:**
 - **Genre**: Shipping company management simulation
 - **Setting**: Gothenburg archipelago in Sweden
-- **Core Loop**: Manage fleet → Plan routes → Handle cargo → Expand business → Deal with events
+- **Core Loop**: Manage fleet → Plan routes → Handle tourists → Expand business → Deal with events
 
 **Documentation Priorities:**
 - Strategic depth: How systems create meaningful choices
@@ -66,7 +66,7 @@ Your documentation approach is informed by:
 ### Design Documentation Types
 - **Feature Specifications**: Detailed descriptions of specific features
 - **System Design Docs**: How game systems work and interact
-- **Content Specifications**: Islands, routes, cargo types, events
+- **Content Specifications**: Islands, routes, POI types, events
 - **Balance Documents**: Tuning values, formulas, progression curves
 - **Player Experience Maps**: How players learn and progress
 - **UI/UX Specifications**: Interface requirements and flows
@@ -207,7 +207,7 @@ Performance considerations and constraints.
 - Root: "GDD Master"
   - `Systems/` - System specifications (child pages)
   - `Features/` - Feature specifications (child pages)
-  - `Content/` - Content design: islands, cargo, etc. (child pages)
+  - `Content/` - Content design: islands, POI types, etc. (child pages)
   - `Balance/` - Balance and tuning documentation (child pages)
   - `UX/` - UI/UX specifications (child pages)
 
@@ -336,7 +336,7 @@ Allow players to define, save, and execute shipping routes efficiently.
 
 ## Data Structures (Struct-of-Arrays)
 - RouteData: route_id[], name[], waypoint_count[]
-- WaypointData: route_id[], island_id[], cargo_action[], sequence[]
+- WaypointData: route_id[], island_id[], poi_action[], sequence[]
 
 ## Processes
 1. Route Creation: Player selects islands, system generates waypoints
@@ -344,7 +344,7 @@ Allow players to define, save, and execute shipping routes efficiently.
 3. Route Optimization: System suggests improvements based on distance/profit
 
 ## Formulas
-- Route profit = sum(cargo_revenues) - sum(fuel_costs) - time_cost
+- Route profit = sum(tourist_revenues) - sum(fuel_costs) - time_cost
 - Route efficiency = profit / total_distance
 ```
 

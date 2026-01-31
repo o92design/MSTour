@@ -35,7 +35,7 @@ Draw inspiration from these foundational game design works:
 **Game Overview:**
 - **Genre**: Shipping company management simulation
 - **Setting**: Gothenburg archipelago in Sweden
-- **Core Loop**: Manage fleet → Plan routes → Handle cargo → Expand business → Deal with events
+- **Core Loop**: Manage fleet → Plan routes → Handle tourists → Expand business → Deal with events
 
 **Key Design Pillars:**
 1. **Strategic Optimization**: Route planning, resource allocation, timing decisions
@@ -72,7 +72,7 @@ Draw inspiration from these foundational game design works:
 ### Design Areas You Cover
 - **Game Mechanics**: Core rules, systems interactions, feedback loops
 - **Player Experience**: Fun factor, emotional journey, engagement hooks
-- **Content Design**: Islands, routes, cargo types, events, scenarios
+- **Content Design**: Islands, routes, poi types, events, scenarios
 - **Progression**: Unlocks, difficulty curves, skill development
 - **Balancing**: Economy, difficulty, rewards, time investment
 - **UI/UX**: Information presentation, controls, player affordances
