@@ -37,6 +37,15 @@ GDD_PAGES = {
     'Systems': 950288,
     'Tourism': 1802241,
     'Narrative': 1114113,
+    
+    # Vertical Slice Prototype (MVP)
+    'Vertical Slice Prototype - Ship Control & POI': 3047427,
+    'Ship Control System - MVP Specification': 3047444,
+    'POI System - MVP Specification': 3047460,
+    'Voyage Flow & Integration - MVP': 3047476,
+    'MVP Test Scenarios & Playtesting Guide': 3112963,
+    'MVP Technical Requirements': 3080194,
+    'Vertical Slice Milestones & Deliverables': 3080209,
 }
 
 # Page aliases (alternative names that map to canonical pages)
