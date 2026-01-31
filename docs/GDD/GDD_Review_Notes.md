@@ -1,7 +1,27 @@
 # GDD Review Notes
 
-**Last Updated**: 2026-01-26  
+**Last Updated**: 2026-01-30  
 **Purpose**: This document is used for handling internal notes on the different parts of the GDD
+
+---
+
+## 2026-01-30
+
+**Ship Propulsion System Redesign Completed:**
+- ✅ Sailing ships removed from design (historically inaccurate for commercial passenger ferries)
+- ✅ Steam → Diesel engine progression implemented
+- ✅ Created comprehensive [Ship Propulsion and Engine Systems](https://o92design.atlassian.net/wiki/spaces/MS/pages/2588673) GDD page
+- ✅ Updated GDD Master with engine-ship separation model
+- ✅ Updated Quick Reference with diesel unlock timeline (1910+)
+- ✅ Engine marketplace system designed (shipyard facility upgrade + mechanic skills)
+- ✅ Historical timeline integrated (1887-1950s steam to diesel transition)
+
+**Key Design Decisions:**
+- Engine-ship separation: Ships are hulls upgradeable with different engines
+- Two-layer unlock: Player shipyard upgrade (1910+) + mechanic skill progression
+- Four-tier mechanic skills (Novice/Trained/Proficient/Expert) affecting upgrade time, maintenance, fuel efficiency
+- Diesel prestige bonus scaled by era (early adopter rewards)
+- Act 1 starter: Small steam commuter ferry (not sailing ship)
 
 ---
 
@@ -26,5 +46,5 @@ Oskar Notes:
 
 ---
 **Index Version**: 1.0  
-**Last Updated**: 2026-01-26  
+**Last Updated**: 2026-01-30  
 **Maintained By**: Anyone

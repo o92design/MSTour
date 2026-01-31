@@ -27,6 +27,7 @@ GDD_PAGES = {
     'Core Gameplay Loop': 622601,
     'Ship Control': 1343506,
     'Passenger System': 1572869,
+    'Ship Propulsion and Engine Systems': 2588673,
     
     # Narrative
     'Three-Act Structure': 851973,
