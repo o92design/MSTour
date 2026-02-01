@@ -14,7 +14,11 @@ param(
 
 # Load .env
 function Load-Env {
-    $envFile = Join-Path $PSScriptRoot "..\..\.env"
+    $envFile = Join-Path $PSScriptRoot "..\.env"
+    if (-not (Test-Path $envFile)) {
+        Write-Error ".env file not found at $envFile"
+        exit 1
+    }
     $env = @{}
     Get-Content $envFile | ForEach-Object {
         if ($_ -and -not $_.StartsWith('#')) {
