@@ -188,15 +188,19 @@ void debug_tools_draw_help(const DebugState* state) {
     DrawText("MS TOUR - DEBUG CONTROLS [F3]", 100, y, 30, YELLOW);
     y += 50;
     
-    DrawText("=== Ship Controls ===", 100, y, 24, WHITE);
+    DrawText("=== Ship Controls (Engine Telegraph) ===", 100, y, 24, WHITE);
     y += line_height;
-    DrawText("W / Up Arrow     - Throttle Forward", 120, y, 20, LIGHTGRAY);
+    DrawText("W / Up Arrow     - Ring Up (increase throttle step)", 120, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("S / Down Arrow   - Throttle Reverse", 120, y, 20, LIGHTGRAY);
+    DrawText("                   Orders: Stop → Slow → Half → Full", 120, y, 18, DARKGRAY);
     y += line_height;
-    DrawText("A / Left Arrow   - Turn Left", 120, y, 20, LIGHTGRAY);
+    DrawText("S / Down Arrow   - Ring Down (decrease throttle step)", 120, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("D / Right Arrow  - Turn Right", 120, y, 20, LIGHTGRAY);
+    DrawText("                   Includes Reverse: Slow → Half → Full Astern", 120, y, 18, DARKGRAY);
+    y += line_height;
+    DrawText("A / Left Arrow   - Turn Left (hold)", 120, y, 20, LIGHTGRAY);
+    y += line_height;
+    DrawText("D / Right Arrow  - Turn Right (hold)", 120, y, 20, LIGHTGRAY);
     y += line_height + 10;
     
     DrawText("=== Debug Tools ===", 100, y, 24, WHITE);

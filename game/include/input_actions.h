@@ -22,6 +22,12 @@ void input_actions_update(void);
 // Check if action is currently active
 bool input_action_is_active(ShipAction action);
 
+// Check if action was just pressed this frame
+bool input_action_pressed(ShipAction action);
+
+// Check if action was just released this frame
+bool input_action_released(ShipAction action);
+
 // Get action axis value (-1.0 to 1.0 for analog inputs, -1/0/1 for digital)
 float input_action_get_axis(ShipAction action);
 

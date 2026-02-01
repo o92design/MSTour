@@ -36,6 +36,26 @@ bool input_action_is_active(ShipAction action) {
            IsKeyDown(action_bindings_alt[action]);
 }
 
+bool input_action_pressed(ShipAction action) {
+    if (action < 0 || action >= SHIP_ACTION_COUNT) {
+        return false;
+    }
+    
+    // Check if either binding was just pressed this frame
+    return IsKeyPressed(action_bindings[action]) || 
+           IsKeyPressed(action_bindings_alt[action]);
+}
+
+bool input_action_released(ShipAction action) {
+    if (action < 0 || action >= SHIP_ACTION_COUNT) {
+        return false;
+    }
+    
+    // Check if either binding was just released this frame
+    return IsKeyReleased(action_bindings[action]) || 
+           IsKeyReleased(action_bindings_alt[action]);
+}
+
 float input_action_get_axis(ShipAction action) {
     return input_action_is_active(action) ? 1.0f : 0.0f;
 }

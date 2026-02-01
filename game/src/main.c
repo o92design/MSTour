@@ -2,6 +2,7 @@
 #include "engine_renderer.h"
 #include "../include/input_actions.h"
 #include "../include/ship_physics.h"
+#include "../include/ship_telegraph.h"
 #include "../include/config.h"
 #include "../include/debug_tools.h"
 #include <raylib.h>
@@ -34,6 +35,11 @@ int main(void) {
     // Initialize ship
     ShipState ship;
     ship_physics_init(&ship, 640.0f, 360.0f, 0.0f); // Center of screen, facing north
+    
+    // Initialize telegraph (engine order system)
+    ShipTelegraph telegraph;
+    ship_telegraph_init(&telegraph);
+    printf("Engine telegraph initialized at STOP\n");
     
     // Load physics configuration from config.ini
     ShipPhysicsConfig physics_config;
@@ -70,13 +76,25 @@ int main(void) {
         }
         if (IsKeyPressed(KEY_F5)) {
             debug_tools_reset_ship(&ship);
+            ship_telegraph_init(&telegraph); // Also reset telegraph
         }
         if (IsKeyPressed(KEY_F6)) {
             config_reload_ship_physics(config_path, &physics_config);
         }
         
-        // Get input axes
-        float throttle_input = input_action_get_throttle_axis();
+        // Telegraph controls (key presses, not holds)
+        if (input_action_pressed(SHIP_ACTION_THROTTLE_UP)) {
+            ship_telegraph_ring_up(&telegraph);
+        }
+        if (input_action_pressed(SHIP_ACTION_THROTTLE_DOWN)) {
+            ship_telegraph_ring_down(&telegraph);
+        }
+        
+        // Update telegraph timer
+        ship_telegraph_update(&telegraph, delta_time);
+        
+        // Get throttle from telegraph and steering from input
+        float throttle_input = ship_telegraph_get_throttle(&telegraph);
         float steering_input = input_action_get_steering_axis();
         
         // Process actions and update ship physics
@@ -92,7 +110,7 @@ int main(void) {
         // Draw simple UI (only if help is not shown)
         if (!debug_state.show_help) {
             renderer_draw_text("MS Tour - Ship Control Prototype", 20, 20, 30, WHITE);
-            renderer_draw_text("Controls: WASD or Arrow Keys | F3 for Help", 20, 60, 20, LIGHTGRAY);
+            renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help", 20, 60, 20, LIGHTGRAY);
         }
 
         // === DRAW SHIP ===
@@ -138,26 +156,23 @@ int main(void) {
         if (!debug_state.show_help && !debug_state.show_debug_panel) {
             char debug_text[256];
             
+            // Engine Telegraph Order (prominent display)
+            const char* order_name = ship_telegraph_get_order_name(ship_telegraph_get_order(&telegraph));
+            snprintf(debug_text, sizeof(debug_text), "Engine Order: %s", order_name);
+            renderer_draw_text(debug_text, 20, 95, 22, GOLD);
+            
             // Position
             snprintf(debug_text, sizeof(debug_text), "Position: (%.1f, %.1f)", ship.pos_x, ship.pos_y);
-            renderer_draw_text(debug_text, 20, 95, 18, WHITE);
+            renderer_draw_text(debug_text, 20, 130, 18, WHITE);
             
             // Heading
             snprintf(debug_text, sizeof(debug_text), "Heading: %.1f°", ship.heading);
-            renderer_draw_text(debug_text, 20, 120, 18, WHITE);
+            renderer_draw_text(debug_text, 20, 155, 18, WHITE);
             
             // Speed
             snprintf(debug_text, sizeof(debug_text), "Speed: %.1f u/s (%.1f%%)", 
                      ship.speed, (ship.speed / physics_config.max_speed) * 100.0f);
-            renderer_draw_text(debug_text, 20, 145, 18, WHITE);
-            
-            // Throttle
-            snprintf(debug_text, sizeof(debug_text), "Throttle: %.2f", ship.throttle);
-            renderer_draw_text(debug_text, 20, 170, 18, WHITE);
-            
-            // Rudder
-            snprintf(debug_text, sizeof(debug_text), "Rudder: %.2f", ship.rudder);
-            renderer_draw_text(debug_text, 20, 195, 18, WHITE);
+            renderer_draw_text(debug_text, 20, 180, 18, WHITE);
 
             // Display frame info
             snprintf(debug_text, sizeof(debug_text), "FPS: %.1f | Frame: %llu", 
