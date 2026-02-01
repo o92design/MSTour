@@ -3,6 +3,7 @@
 #include "../include/input_actions.h"
 #include "../include/ship_physics.h"
 #include "../include/ship_telegraph.h"
+#include "../include/ship_ui.h"
 #include "../include/config.h"
 #include "../include/debug_tools.h"
 #include <raylib.h>
@@ -54,6 +55,48 @@ int main(void) {
     DebugState debug_state;
     debug_tools_init(&debug_state);
     printf("Debug tools initialized (F1-F6 for debug controls, F3 for help)\n");
+    
+    // Initialize ship UI
+    ship_ui_init();
+    printf("Ship UI system initialized\n");
+    
+    // Initialize audio device
+    InitAudioDevice();
+    printf("Audio system initialized\n");
+    
+    // Load sounds
+    Sound telegraph_bell = {0};
+    Sound engine_sound = {0};
+    Sound water_ambient = {0};
+    
+    // Try to load sounds (gracefully handle missing files)
+    if (FileExists("assets/sounds/telegraph_bell.mp3")) {
+        telegraph_bell = LoadSound("assets/sounds/telegraph_bell.mp3");
+        printf("Loaded telegraph bell sound\n");
+    } else {
+        printf("Warning: telegraph_bell.mp3 not found, audio disabled\n");
+    }
+    
+    if (FileExists("assets/sounds/engine_loop.mp3")) {
+        engine_sound = LoadSound("assets/sounds/engine_loop.mp3");
+        SetSoundVolume(engine_sound, 0.3f);
+        PlaySound(engine_sound);
+        printf("Loaded engine sound\n");
+    } else {
+        printf("Warning: engine_loop.mp3 not found, audio disabled\n");
+    }
+    
+    if (FileExists("assets/sounds/water_ambient.mp3")) {
+        water_ambient = LoadSound("assets/sounds/water_ambient.mp3");
+        SetSoundVolume(water_ambient, 0.2f);
+        PlaySound(water_ambient);
+        printf("Loaded water ambient sound\n");
+    } else {
+        printf("Warning: water_ambient.mp3 not found, audio disabled\n");
+    }
+    
+    // Track previous telegraph order for bell sound
+    TelegraphOrder prev_order = ship_telegraph_get_order(&telegraph);
 
     printf("Ship initialized at (%.1f, %.1f)\n", ship.pos_x, ship.pos_y);
 
@@ -85,9 +128,17 @@ int main(void) {
         // Telegraph controls (key presses, not holds)
         if (input_action_pressed(SHIP_ACTION_THROTTLE_UP)) {
             ship_telegraph_ring_up(&telegraph);
+            // Play telegraph bell sound
+            if (telegraph_bell.frameCount > 0) {
+                PlaySound(telegraph_bell);
+            }
         }
         if (input_action_pressed(SHIP_ACTION_THROTTLE_DOWN)) {
             ship_telegraph_ring_down(&telegraph);
+            // Play telegraph bell sound
+            if (telegraph_bell.frameCount > 0) {
+                PlaySound(telegraph_bell);
+            }
         }
         
         // Update telegraph timer
@@ -100,6 +151,23 @@ int main(void) {
         // Process actions and update ship physics
         ship_physics_process_actions(&ship, throttle_input, steering_input);
         ship_physics_update(&ship, &physics_config, delta_time);
+        
+        // Update engine sound pitch based on speed
+        if (engine_sound.frameCount > 0) {
+            float speed_percent = ship.speed / physics_config.max_speed;
+            float pitch = 0.8f + (speed_percent * 0.6f); // Range: 0.8 to 1.4
+            SetSoundPitch(engine_sound, pitch);
+            
+            // Keep engine sound looping
+            if (!IsSoundPlaying(engine_sound)) {
+                PlaySound(engine_sound);
+            }
+        }
+        
+        // Keep water ambient sound looping
+        if (water_ambient.frameCount > 0 && !IsSoundPlaying(water_ambient)) {
+            PlaySound(water_ambient);
+        }
 
         // === RENDERING ===
         renderer_clear(SKYBLUE);
@@ -152,29 +220,12 @@ int main(void) {
         // === DEBUG VISUALIZATION ===
         debug_tools_draw_visualization(&debug_state, &ship, &physics_config);
 
-        // === DEBUG INFO (only if help and debug panel are not shown) ===
+        // === SHIP UI (gauges and indicators) ===
         if (!debug_state.show_help && !debug_state.show_debug_panel) {
-            char debug_text[256];
+            ship_ui_render(&ship, &telegraph);
             
-            // Engine Telegraph Order (prominent display)
-            const char* order_name = ship_telegraph_get_order_name(ship_telegraph_get_order(&telegraph));
-            snprintf(debug_text, sizeof(debug_text), "Engine Order: %s", order_name);
-            renderer_draw_text(debug_text, 20, 95, 22, GOLD);
-            
-            // Position
-            snprintf(debug_text, sizeof(debug_text), "Position: (%.1f, %.1f)", ship.pos_x, ship.pos_y);
-            renderer_draw_text(debug_text, 20, 130, 18, WHITE);
-            
-            // Heading
-            snprintf(debug_text, sizeof(debug_text), "Heading: %.1f°", ship.heading);
-            renderer_draw_text(debug_text, 20, 155, 18, WHITE);
-            
-            // Speed
-            snprintf(debug_text, sizeof(debug_text), "Speed: %.1f u/s (%.1f%%)", 
-                     ship.speed, (ship.speed / physics_config.max_speed) * 100.0f);
-            renderer_draw_text(debug_text, 20, 180, 18, WHITE);
-
             // Display frame info
+            char debug_text[256];
             snprintf(debug_text, sizeof(debug_text), "FPS: %.1f | Frame: %llu", 
                      1.0f / delta_time, 
                      (unsigned long long)engine_state->frame_count);
@@ -191,6 +242,12 @@ int main(void) {
     }
 
     // Cleanup
+    if (telegraph_bell.frameCount > 0) UnloadSound(telegraph_bell);
+    if (engine_sound.frameCount > 0) UnloadSound(engine_sound);
+    if (water_ambient.frameCount > 0) UnloadSound(water_ambient);
+    CloseAudioDevice();
+    
+    ship_ui_cleanup();
     renderer_shutdown();
     engine_shutdown();
 

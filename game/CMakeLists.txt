@@ -48,4 +48,20 @@ if(WIN32)
     endif()
 endif()
 
+# Copy assets folder to build directory
+add_custom_command(TARGET MSTour POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        "$<TARGET_FILE_DIR:MSTour>/assets"
+    COMMENT "Copying assets to build directory"
+)
+
+# Copy config.ini to build directory
+add_custom_command(TARGET MSTour POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config.ini"
+        "$<TARGET_FILE_DIR:MSTour>/config.ini"
+    COMMENT "Copying config.ini to build directory"
+)
+
 message(STATUS "Game executable configured")
