@@ -50,3 +50,10 @@ assets/cache/
 # Python specific
 __pycache__/
 *.pyc
+
+# Visual Studio specific
+*.vcxproj.user
+*.pdb
+*.ipch
+*.log
+*.tlog
