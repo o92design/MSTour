@@ -2,6 +2,26 @@
 
 This document defines specialized agents for delegating tasks within the MS Tour project.
 
+## Recent Update (2026-02-01)
+
+**All 7 agents have been enhanced with comprehensive MS Tour game context** to improve their effectiveness:
+
+- **game-agent**, **engine-agent**, **game-design-consultant**: HIGH context (gameplay mechanics, technical constraints, design vision)
+- **game-design-creator**, **test-agent**, **docs-agent**, **jira-agent**: BALANCED context (systems overview, project context)
+
+Each agent now understands:
+- **Game setting**: Gothenburg Archipelago, Sweden (1887-1950s)
+- **Core concept**: Shipping company management with direct ship control + business strategy
+- **Three-act narrative**: Captain → Patriarch → Succession
+- **Performance targets**: 60 FPS, 50+ ships, 20+ islands
+- **Technical approach**: Data-oriented design, C/C++ architecture
+
+Context is customized per agent role - implementation agents get gameplay/technical details, design agents get vision/pillars, support agents get project overview.
+
+**Maintenance**: When game design evolves (major systems added/changed), update relevant agent context sections. The GDD Master in Confluence is the single source of truth.
+
+---
+
 ## Available Agents
 
 ### 1. Engine Agent
