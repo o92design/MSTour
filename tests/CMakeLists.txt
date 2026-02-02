@@ -35,6 +35,18 @@ target_link_libraries(MSTour_tests
         GTest::gtest_main
 )
 
+# Copy config.ini to test directory for physics tuning tests
+# Copy to both the executable directory and the CTest working directory
+add_custom_command(TARGET MSTour_tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config.ini"
+        "$<TARGET_FILE_DIR:MSTour_tests>/config.ini"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config.ini"
+        "${CMAKE_CURRENT_BINARY_DIR}/config.ini"
+    COMMENT "Copying config.ini to test directories"
+)
+
 # Discover tests
 include(GoogleTest)
 gtest_discover_tests(MSTour_tests)
