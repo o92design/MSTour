@@ -1,17 +1,36 @@
 #include "engine_core.h"
+#include "engine_config.h"
 #include "engine_renderer.h"
+#include "game_state.h"
+#include "game_update.h"
+#include "game_render.h"
+#include "input_actions.h"
+#include "ship_ui.h"
+#include "game_constants.h"
 #include <raylib.h>
 #include <stdio.h>
+
+// Global config file for hot-reload support
+static ConfigFile g_config;
 
 int main(void) {
     printf("=== MS Tour - Gothenburg Archipelago Shipping Company ===\n");
 
-    // Engine configuration
+    // Load configuration from file
+    config_init(&g_config);
+    if (!config_load(&g_config, "config.ini")) {
+        printf("Using default configuration\n");
+    }
+
+    // Get window configuration (uses defaults if not loaded)
+    WindowConfig window_cfg = config_get_window(&g_config);
+    
+    // Engine configuration from loaded config
     EngineConfig config = {
-        .window_title = "MS Tour - Archipelago Shipping",
-        .window_width = 1280,
-        .window_height = 720,
-        .target_fps = 60
+        .window_title = window_cfg.title,
+        .window_width = window_cfg.width,
+        .window_height = window_cfg.height,
+        .target_fps = window_cfg.target_fps
     };
 
     // Initialize engine
@@ -22,35 +41,48 @@ int main(void) {
 
     renderer_init();
 
+    // Initialize input action system
+    input_actions_init();
+    printf("Input action system initialized\n");
+
+    // Initialize game state (pass config for audio settings)
+    GameState* game = game_get_state();
+    if (!game_state_init(game, &g_config)) {
+        fprintf(stderr, "Failed to initialize game state!\n");
+        engine_shutdown();
+        return 1;
+    }
+
+    // Initialize ship UI
+    ship_ui_init();
+    printf("Ship UI system initialized\n");
+
+    printf("Ship initialized at (%.1f, %.1f)\n", 
+           game->player_ship.pos_x, game->player_ship.pos_y);
+    printf("Debug tools: F1-F6 for controls, F3 for help\n");
+
     // Main game loop
     while (!engine_should_close()) {
+        float delta_time = (float)engine_get_delta_time();
+
         engine_begin_frame();
 
-        // Clear screen with Raylib's SKYBLUE
-        renderer_clear(SKYBLUE);
+        // Update game systems
+        game_update(game, delta_time);
 
-        // Draw simple UI
-        renderer_draw_text("MS Tour - Archipelago Shipping Company", 20, 20, 30, WHITE);
-        renderer_draw_text("Press ESC to exit", 20, 60, 20, WHITE);
-
-        // Draw a simple ship placeholder
-        renderer_draw_rectangle(600, 350, 80, 40, RED);
-        renderer_draw_text("Ship", 610, 360, 20, WHITE);
-
-        // Display frame info
-        EngineState* state = engine_get_state();
-        char fps_text[64];
-        snprintf(fps_text, sizeof(fps_text), "FPS: %.1f | Frame: %llu", 
-                 1.0 / state->delta_time, 
-                 (unsigned long long)state->frame_count);
-        renderer_draw_text(fps_text, 20, 680, 20, YELLOW);
+        // Render game
+        game_render(game);
 
         engine_end_frame();
     }
 
     // Cleanup
+    ship_ui_cleanup();
+    game_state_shutdown(game);
     renderer_shutdown();
     engine_shutdown();
+
+    printf("MS Tour shutdown complete\n");
 
     return 0;
 }
