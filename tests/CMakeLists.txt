@@ -12,8 +12,9 @@ file(GLOB_RECURSE GAME_SOURCES
     "${CMAKE_SOURCE_DIR}/game/src/*.c"
 )
 
-# Filter out main.c from game sources
-list(FILTER GAME_SOURCES EXCLUDE REGEX ".*main\\.c$")
+# Filter out the game entry point (exact path to avoid removing other main.c files)
+set(GAME_MAIN_SOURCE "${CMAKE_SOURCE_DIR}/game/src/main.c")
+list(REMOVE_ITEM GAME_SOURCES "${GAME_MAIN_SOURCE}")
 
 # Create test executable
 add_executable(MSTour_tests

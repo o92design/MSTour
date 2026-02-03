@@ -89,10 +89,23 @@ void ecs_destroy_entity(ECSWorld* world, Entity entity) {
 
 bool ecs_entity_valid(const ECSWorld* world, Entity entity) {
     if (!world || entity == INVALID_ENTITY || entity >= MAX_ENTITIES) return false;
-    // An entity is valid if it has any components (or is at least marked as existing)
-    // For now, we check if it's not in free list by checking mask
-    return world->entity_masks[entity] != COMPONENT_NONE || 
-           (entity < world->entity_count && world->free_count < MAX_ENTITIES - 1);
+
+    // An entity is valid if it is not currently in the free list.
+    // Fast path: if it has any components, it is definitely alive.
+    if (world->entity_masks[entity] != COMPONENT_NONE) {
+        return true;
+    }
+
+    // Slow path: entity has no components; determine validity by checking the free list.
+    // If the entity is present in the free list, it is invalid (destroyed/never allocated).
+    for (uint32_t i = 0; i < world->free_count; i++) {
+        if (world->free_list[i] == entity) {
+            return false;
+        }
+    }
+
+    // Not in the free list, so this is a live entity slot that currently has no components.
+    return true;
 }
 
 bool ecs_has_component(const ECSWorld* world, Entity entity, ComponentType type) {

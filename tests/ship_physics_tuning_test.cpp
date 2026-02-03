@@ -74,16 +74,19 @@ protected:
 };
 
 // Callback helpers for simulate_until
+// Contract: user_data must point to a valid float containing the target speed (in engine units).
 static bool speed_reached(const ShipState* state, void* user_data) {
     float target_speed = *(float*)user_data;
     return state->speed >= target_speed;
 }
 
+// Contract: user_data must point to a valid float containing the speed threshold (in engine units).
 static bool speed_below(const ShipState* state, void* user_data) {
     float threshold = *(float*)user_data;
     return state->speed < threshold;
 }
 
+// Contract: user_data must point to a valid float containing the target heading delta (in radians).
 static bool heading_changed(const ShipState* state, void* user_data) {
     float target_delta = *(float*)user_data;
     // Assuming we track initial heading separately

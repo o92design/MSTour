@@ -99,7 +99,7 @@ void ship_render_draw_wake(const ShipState* ship, float intensity) {
     
     // Wake intensity based on speed
     float speed_factor = math_clamp(math_abs(ship->speed) / 100.0f, 0.0f, 1.0f);
-    float alpha = (unsigned char)(100.0f * speed_factor * intensity);
+    float alpha = 100.0f * speed_factor * intensity;
     
     // Draw wake as fading circles
     for (int i = 0; i < 3; i++) {
