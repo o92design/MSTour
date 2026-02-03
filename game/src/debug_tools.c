@@ -1,13 +1,11 @@
 #include "debug_tools.h"
+#include "engine_math.h"
+#include "engine_ui.h"
+#include "game_constants.h"
 #include <raylib.h>
 #include <raymath.h>
 #include <stdio.h>
 #include <math.h>
-
-// Helper: Convert degrees to radians
-static float deg_to_rad(float degrees) {
-    return degrees * (PI / 180.0f);
-}
 
 void debug_tools_init(DebugState* state) {
     state->show_visualization = false;
@@ -42,7 +40,7 @@ void debug_tools_draw_visualization(const DebugState* state, const ShipState* sh
     
     // === VELOCITY VECTOR ===
     if (fabsf(ship->speed) > 0.1f) {
-        float heading_rad = deg_to_rad(ship->heading - 90.0f);
+        float heading_rad = math_deg_to_rad(ship->heading - 90.0f);
         Vector2 velocity_end = {
             ship_pos.x + cosf(heading_rad) * ship->speed * 2.0f,
             ship_pos.y + sinf(heading_rad) * ship->speed * 2.0f
@@ -60,7 +58,7 @@ void debug_tools_draw_visualization(const DebugState* state, const ShipState* sh
     
     // === HEADING INDICATOR ===
     {
-        float heading_rad = deg_to_rad(ship->heading - 90.0f);
+        float heading_rad = math_deg_to_rad(ship->heading - 90.0f);
         Vector2 heading_end = {
             ship_pos.x + cosf(heading_rad) * 50.0f,
             ship_pos.y + sinf(heading_rad) * 50.0f
@@ -81,7 +79,7 @@ void debug_tools_draw_visualization(const DebugState* state, const ShipState* sh
         if (turn_radius < 2000.0f) {
             // Calculate center of turn circle
             float perpendicular_angle = ship->heading + (ship->angular_velocity > 0 ? 0.0f : 180.0f);
-            float perp_rad = deg_to_rad(perpendicular_angle - 90.0f);
+            float perp_rad = math_deg_to_rad(perpendicular_angle - 90.0f);
             
             Vector2 circle_center = {
                 ship_pos.x + cosf(perp_rad) * turn_radius,
@@ -105,7 +103,7 @@ void debug_tools_draw_visualization(const DebugState* state, const ShipState* sh
     if (fabsf(ship->angular_velocity) > 0.5f) {
         // Show drift direction
         float drift_angle = ship->heading + (ship->angular_velocity > 0 ? 90.0f : -90.0f);
-        float drift_rad = deg_to_rad(drift_angle - 90.0f);
+        float drift_rad = math_deg_to_rad(drift_angle - 90.0f);
         float drift_magnitude = config->drift_factor * fabsf(ship->angular_velocity) * fabsf(ship->speed) * 0.5f;
         
         Vector2 drift_end = {
@@ -126,11 +124,14 @@ void debug_tools_draw_visualization(const DebugState* state, const ShipState* sh
 void debug_tools_draw_panel(const DebugState* state, const ShipState* ship, const ShipPhysicsConfig* config) {
     if (!state->show_debug_panel) return;
     
-    // Draw semi-transparent background panel
-    int panel_x = 1000;
-    int panel_y = 20;
-    int panel_width = 260;
-    int panel_height = 400;
+    // Panel dimensions
+    int panel_width = UI_DEBUG_PANEL_WIDTH;
+    int panel_height = UI_DEBUG_PANEL_HEIGHT;
+    int margin = UI_DEBUG_PANEL_MARGIN;
+    
+    // Position panel at top-right corner using relative positioning
+    int panel_x = (int)ui_from_right((float)(panel_width + margin));
+    int panel_y = margin;
     
     DrawRectangle(panel_x, panel_y, panel_width, panel_height, (Color){0, 0, 0, 200});
     DrawRectangleLines(panel_x, panel_y, panel_width, panel_height, WHITE);
@@ -179,53 +180,59 @@ void debug_tools_draw_panel(const DebugState* state, const ShipState* ship, cons
 void debug_tools_draw_help(const DebugState* state) {
     if (!state->show_help) return;
     
-    // Draw semi-transparent overlay
-    DrawRectangle(0, 0, 1280, 720, (Color){0, 0, 0, 230});
+    // Get window dimensions for responsive overlay
+    int width = (int)ui_get_width();
+    int height = (int)ui_get_height();
     
-    int y = 100;
+    // Draw semi-transparent overlay (full window)
+    DrawRectangle(0, 0, width, height, (Color){0, 0, 0, 230});
+    
+    // Calculate starting position (relative to window)
+    int start_x = (int)ui_get_relative_x(0.08f);  // 8% from left
+    int y = (int)ui_get_relative_y(0.14f);        // 14% from top
     int line_height = 30;
     
-    DrawText("MS TOUR - DEBUG CONTROLS [F3]", 100, y, 30, YELLOW);
+    DrawText("MS TOUR - DEBUG CONTROLS [F3]", start_x, y, 30, YELLOW);
     y += 50;
     
-    DrawText("=== Ship Controls (Engine Telegraph) ===", 100, y, 24, WHITE);
+    DrawText("=== Ship Controls (Engine Telegraph) ===", start_x, y, 24, WHITE);
     y += line_height;
-    DrawText("W / Up Arrow     - Ring Up (increase throttle step)", 120, y, 20, LIGHTGRAY);
+    DrawText("W / Up Arrow     - Ring Up (increase throttle step)", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("                   Orders: Stop → Slow → Half → Full", 120, y, 18, DARKGRAY);
+    DrawText("                   Orders: Stop → Slow → Half → Full", start_x + 20, y, 18, DARKGRAY);
     y += line_height;
-    DrawText("S / Down Arrow   - Ring Down (decrease throttle step)", 120, y, 20, LIGHTGRAY);
+    DrawText("S / Down Arrow   - Ring Down (decrease throttle step)", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("                   Includes Reverse: Slow → Half → Full Astern", 120, y, 18, DARKGRAY);
+    DrawText("                   Includes Reverse: Slow → Half → Full Astern", start_x + 20, y, 18, DARKGRAY);
     y += line_height;
-    DrawText("A / Left Arrow   - Turn Left (hold)", 120, y, 20, LIGHTGRAY);
+    DrawText("A / Left Arrow   - Turn Left (hold)", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("D / Right Arrow  - Turn Right (hold)", 120, y, 20, LIGHTGRAY);
+    DrawText("D / Right Arrow  - Turn Right (hold)", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height + 10;
     
-    DrawText("=== Debug Tools ===", 100, y, 24, WHITE);
+    DrawText("=== Debug Tools ===", start_x, y, 24, WHITE);
     y += line_height;
-    DrawText("F1 - Toggle Visualization (velocity, turn radius)", 120, y, 20, LIGHTGRAY);
+    DrawText("F1 - Toggle Visualization (velocity, turn radius)", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("F2 - Toggle Debug Panel (ship state values)", 120, y, 20, LIGHTGRAY);
+    DrawText("F2 - Toggle Debug Panel (ship state values)", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("F3 - Toggle This Help Screen", 120, y, 20, LIGHTGRAY);
+    DrawText("F3 - Toggle This Help Screen", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("F4 - Teleport Ship to Center", 120, y, 20, LIGHTGRAY);
+    DrawText("F4 - Teleport Ship to Center", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("F5 - Reset Ship State", 120, y, 20, LIGHTGRAY);
+    DrawText("F5 - Reset Ship State", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("F6 - Hot-Reload config.ini", 120, y, 20, LIGHTGRAY);
+    DrawText("F6 - Hot-Reload config.ini", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height + 10;
     
-    DrawText("=== Info ===", 100, y, 24, WHITE);
+    DrawText("=== Info ===", start_x, y, 24, WHITE);
     y += line_height;
-    DrawText("Edit config.ini in the game folder to tune physics", 120, y, 20, LIGHTGRAY);
+    DrawText("Edit config.ini in the game folder to tune physics", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height;
-    DrawText("Press F6 to reload without recompiling", 120, y, 20, LIGHTGRAY);
+    DrawText("Press F6 to reload without recompiling", start_x + 20, y, 20, LIGHTGRAY);
     y += line_height + 20;
     
-    DrawText("Press F3 or ESC to close this help screen", 100, y, 20, YELLOW);
+    DrawText("Press F3 or ESC to close this help screen", start_x, y, 20, YELLOW);
 }
 
 void debug_tools_teleport_ship(ShipState* ship, float x, float y) {

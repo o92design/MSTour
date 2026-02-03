@@ -1,4 +1,6 @@
 #include "ship_ui.h"
+#include "engine_ui.h"
+#include "game_constants.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -22,7 +24,7 @@ void ship_ui_render_speed_gauge(float speed, float max_speed, Vector2 position, 
     // Draw tick marks for speed increments (0%, 25%, 50%, 75%, 100%)
     for (int i = 0; i <= 4; i++) {
         float angle = -135.0f + (270.0f * i / 4.0f); // Start at bottom-left, sweep clockwise
-        float rad = angle * M_PI / 180.0f;
+        float rad = angle * (float)M_PI / 180.0f;
         float cos_angle = cosf(rad);
         float sin_angle = sinf(rad);
         
@@ -41,7 +43,7 @@ void ship_ui_render_speed_gauge(float speed, float max_speed, Vector2 position, 
     // Calculate speed percentage and angle
     float speed_percent = fminf(speed / max_speed, 1.0f);
     float needle_angle = -135.0f + (270.0f * speed_percent);
-    float needle_rad = needle_angle * M_PI / 180.0f;
+    float needle_rad = needle_angle * (float)M_PI / 180.0f;
     
     // Draw speed needle
     Vector2 needle_end = {
@@ -74,7 +76,7 @@ void ship_ui_render_compass(float heading, Vector2 position, float radius) {
     float angles[] = {-90.0f, 0.0f, 90.0f, 180.0f};
     
     for (int i = 0; i < 4; i++) {
-        float angle_rad = angles[i] * M_PI / 180.0f;
+        float angle_rad = angles[i] * (float)M_PI / 180.0f;
         Vector2 text_pos = {
             position.x + cosf(angle_rad) * (radius - 15),
             position.y + sinf(angle_rad) * (radius - 15)
@@ -85,7 +87,7 @@ void ship_ui_render_compass(float heading, Vector2 position, float radius) {
     }
     
     // Draw heading needle (points in direction ship is facing)
-    float heading_rad = (heading - 90.0f) * M_PI / 180.0f; // Adjust for Raylib's coordinate system
+    float heading_rad = (heading - 90.0f) * (float)M_PI / 180.0f; // Adjust for Raylib's coordinate system
     Vector2 needle_end = {
         position.x + cosf(heading_rad) * (radius - 5),
         position.y + sinf(heading_rad) * (radius - 5)
@@ -108,14 +110,14 @@ void ship_ui_render_compass(float heading, Vector2 position, float radius) {
 
 void ship_ui_render_telegraph(const ShipTelegraph* telegraph, Vector2 position) {
     // Draw telegraph box background
-    Rectangle box = {position.x, position.y, 250, 80};
+    Rectangle box = {position.x, position.y, (float)UI_TELEGRAPH_WIDTH, (float)UI_TELEGRAPH_HEIGHT};
     DrawRectangleRec(box, (Color){20, 20, 30, 200});
     DrawRectangleLinesEx(box, 2, GOLD);
     
     // Draw title
     const char* title = "ENGINE TELEGRAPH";
     int title_width = MeasureText(title, 12);
-    DrawText(title, (int)(position.x + 125 - title_width / 2), (int)(position.y + 10), 12, LIGHTGRAY);
+    DrawText(title, (int)(position.x + UI_TELEGRAPH_WIDTH / 2 - title_width / 2), (int)(position.y + 10), 12, LIGHTGRAY);
     
     // Get current order name and throttle
     TelegraphOrder order = ship_telegraph_get_order(telegraph);
@@ -132,31 +134,31 @@ void ship_ui_render_telegraph(const ShipTelegraph* telegraph, Vector2 position) 
     
     // Draw order name (large and prominent)
     int order_width = MeasureText(order_name, 24);
-    DrawText(order_name, (int)(position.x + 125 - order_width / 2), (int)(position.y + 35), 24, order_color);
+    DrawText(order_name, (int)(position.x + UI_TELEGRAPH_WIDTH / 2 - order_width / 2), (int)(position.y + 35), 24, order_color);
     
     // Draw throttle percentage
     char throttle_text[32];
     snprintf(throttle_text, sizeof(throttle_text), "%.0f%%", throttle * 100.0f);
     int throttle_width = MeasureText(throttle_text, 16);
-    DrawText(throttle_text, (int)(position.x + 125 - throttle_width / 2), (int)(position.y + 62), 16, LIGHTGRAY);
+    DrawText(throttle_text, (int)(position.x + UI_TELEGRAPH_WIDTH / 2 - throttle_width / 2), (int)(position.y + 62), 16, LIGHTGRAY);
 }
 
 void ship_ui_render(const ShipState* ship, const ShipTelegraph* telegraph) {
-    int screen_width = GetScreenWidth();
-    int screen_height = GetScreenHeight();
+    // Use relative positioning from engine_ui.h
+    float gauge_radius = UI_GAUGE_RADIUS;
     
-    // Position gauges at bottom of screen
-    float gauge_y = screen_height - 120.0f;
-    float compass_x = 100.0f;
-    float speed_x = screen_width - 100.0f;
+    // Position gauges at bottom of screen using margins
+    float gauge_y = ui_from_bottom(UI_GAUGE_Y_MARGIN);
+    float compass_x = UI_COMPASS_X_MARGIN;
+    float speed_x = ui_from_right(UI_SPEED_X_MARGIN);
     
-    // Render compass (left)
-    ship_ui_render_compass(ship->heading, (Vector2){compass_x, gauge_y}, 50.0f);
+    // Render compass (bottom-left)
+    ship_ui_render_compass(ship->heading, (Vector2){compass_x, gauge_y}, gauge_radius);
     
-    // Render speed gauge (right)
-    ship_ui_render_speed_gauge(ship->speed, 150.0f, (Vector2){speed_x, gauge_y}, 50.0f);
+    // Render speed gauge (bottom-right)
+    ship_ui_render_speed_gauge(ship->speed, 150.0f, (Vector2){speed_x, gauge_y}, gauge_radius);
     
-    // Render telegraph indicator (top center)
-    float telegraph_x = (screen_width - 250) / 2.0f;
-    ship_ui_render_telegraph(telegraph, (Vector2){telegraph_x, 20.0f});
+    // Render telegraph indicator (top-center)
+    UIPosition telegraph_pos = ui_bottom_center((float)UI_TELEGRAPH_WIDTH, ui_get_height() - UI_TELEGRAPH_Y_MARGIN);
+    ship_ui_render_telegraph(telegraph, (Vector2){telegraph_pos.x, (float)UI_TELEGRAPH_Y_MARGIN});
 }

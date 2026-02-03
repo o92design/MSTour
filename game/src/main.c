@@ -1,24 +1,36 @@
 #include "engine_core.h"
+#include "engine_config.h"
 #include "engine_renderer.h"
-#include "../include/input_actions.h"
-#include "../include/ship_physics.h"
-#include "../include/ship_telegraph.h"
-#include "../include/ship_ui.h"
-#include "../include/config.h"
-#include "../include/debug_tools.h"
+#include "game_state.h"
+#include "game_update.h"
+#include "game_render.h"
+#include "input_actions.h"
+#include "ship_ui.h"
+#include "game_constants.h"
 #include <raylib.h>
-#include <raymath.h>
 #include <stdio.h>
+
+// Global config file for hot-reload support
+static ConfigFile g_config;
 
 int main(void) {
     printf("=== MS Tour - Gothenburg Archipelago Shipping Company ===\n");
 
-    // Engine configuration
+    // Load configuration from file
+    config_init(&g_config);
+    if (!config_load(&g_config, "config.ini")) {
+        printf("Using default configuration\n");
+    }
+
+    // Get window configuration (uses defaults if not loaded)
+    WindowConfig window_cfg = config_get_window(&g_config);
+    
+    // Engine configuration from loaded config
     EngineConfig config = {
-        .window_title = "MS Tour - Archipelago Shipping",
-        .window_width = 1280,
-        .window_height = 720,
-        .target_fps = 60
+        .window_title = window_cfg.title,
+        .window_width = window_cfg.width,
+        .window_height = window_cfg.height,
+        .target_fps = window_cfg.target_fps
     };
 
     // Initialize engine
@@ -33,225 +45,44 @@ int main(void) {
     input_actions_init();
     printf("Input action system initialized\n");
 
-    // Initialize ship
-    ShipState ship;
-    ship_physics_init(&ship, 640.0f, 360.0f, 0.0f); // Center of screen, facing north
-    
-    // Initialize telegraph (engine order system)
-    ShipTelegraph telegraph;
-    ship_telegraph_init(&telegraph);
-    printf("Engine telegraph initialized at STOP\n");
-    
-    // Load physics configuration from config.ini
-    ShipPhysicsConfig physics_config;
-    const char* config_path = "config.ini";
-    if (!config_load_ship_physics(config_path, &physics_config)) {
-        // If load fails, save defaults to create the file
-        physics_config = ship_physics_get_default_config();
-        config_save_ship_physics(config_path, &physics_config);
+    // Initialize game state (pass config for audio settings)
+    GameState* game = game_get_state();
+    if (!game_state_init(game, &g_config)) {
+        fprintf(stderr, "Failed to initialize game state!\n");
+        engine_shutdown();
+        return 1;
     }
-    
-    // Initialize debug tools
-    DebugState debug_state;
-    debug_tools_init(&debug_state);
-    printf("Debug tools initialized (F1-F6 for debug controls, F3 for help)\n");
-    
+
     // Initialize ship UI
     ship_ui_init();
     printf("Ship UI system initialized\n");
-    
-    // Initialize audio device
-    InitAudioDevice();
-    printf("Audio system initialized\n");
-    
-    // Load sounds
-    Sound telegraph_bell = {0};
-    Sound engine_sound = {0};
-    Sound water_ambient = {0};
-    
-    // Try to load sounds (gracefully handle missing files)
-    if (FileExists("assets/sounds/telegraph_bell.mp3")) {
-        telegraph_bell = LoadSound("assets/sounds/telegraph_bell.mp3");
-        printf("Loaded telegraph bell sound\n");
-    } else {
-        printf("Warning: telegraph_bell.mp3 not found, audio disabled\n");
-    }
-    
-    if (FileExists("assets/sounds/engine_loop.mp3")) {
-        engine_sound = LoadSound("assets/sounds/engine_loop.mp3");
-        SetSoundVolume(engine_sound, 0.3f);
-        PlaySound(engine_sound);
-        printf("Loaded engine sound\n");
-    } else {
-        printf("Warning: engine_loop.mp3 not found, audio disabled\n");
-    }
-    
-    if (FileExists("assets/sounds/water_ambient.mp3")) {
-        water_ambient = LoadSound("assets/sounds/water_ambient.mp3");
-        SetSoundVolume(water_ambient, 0.2f);
-        PlaySound(water_ambient);
-        printf("Loaded water ambient sound\n");
-    } else {
-        printf("Warning: water_ambient.mp3 not found, audio disabled\n");
-    }
-    
-    // Track previous telegraph order for bell sound
-    TelegraphOrder prev_order = ship_telegraph_get_order(&telegraph);
 
-    printf("Ship initialized at (%.1f, %.1f)\n", ship.pos_x, ship.pos_y);
+    printf("Ship initialized at (%.1f, %.1f)\n", 
+           game->player_ship.pos_x, game->player_ship.pos_y);
+    printf("Debug tools: F1-F6 for controls, F3 for help\n");
 
     // Main game loop
     while (!engine_should_close()) {
-        EngineState* engine_state = engine_get_state();
-        float delta_time = engine_state->delta_time;
+        float delta_time = (float)engine_get_delta_time();
 
         engine_begin_frame();
 
-        // === INPUT ===
-        input_actions_update();
-        
-        // Update debug tools (handle F1-F6 keys)
-        debug_tools_update(&debug_state);
-        
-        // Debug commands
-        if (IsKeyPressed(KEY_F4)) {
-            debug_tools_teleport_ship(&ship, 640.0f, 360.0f);
-        }
-        if (IsKeyPressed(KEY_F5)) {
-            debug_tools_reset_ship(&ship);
-            ship_telegraph_init(&telegraph); // Also reset telegraph
-        }
-        if (IsKeyPressed(KEY_F6)) {
-            config_reload_ship_physics(config_path, &physics_config);
-        }
-        
-        // Telegraph controls (key presses, not holds)
-        if (input_action_pressed(SHIP_ACTION_THROTTLE_UP)) {
-            ship_telegraph_ring_up(&telegraph);
-            // Play telegraph bell sound
-            if (telegraph_bell.frameCount > 0) {
-                PlaySound(telegraph_bell);
-            }
-        }
-        if (input_action_pressed(SHIP_ACTION_THROTTLE_DOWN)) {
-            ship_telegraph_ring_down(&telegraph);
-            // Play telegraph bell sound
-            if (telegraph_bell.frameCount > 0) {
-                PlaySound(telegraph_bell);
-            }
-        }
-        
-        // Update telegraph timer
-        ship_telegraph_update(&telegraph, delta_time);
-        
-        // Get throttle from telegraph and steering from input
-        float throttle_input = ship_telegraph_get_throttle(&telegraph);
-        float steering_input = input_action_get_steering_axis();
-        
-        // Process actions and update ship physics
-        ship_physics_process_actions(&ship, throttle_input, steering_input);
-        ship_physics_update(&ship, &physics_config, delta_time);
-        
-        // Update engine sound pitch based on speed
-        if (engine_sound.frameCount > 0) {
-            float speed_percent = ship.speed / physics_config.max_speed;
-            float pitch = 0.8f + (speed_percent * 0.6f); // Range: 0.8 to 1.4
-            SetSoundPitch(engine_sound, pitch);
-            
-            // Keep engine sound looping
-            if (!IsSoundPlaying(engine_sound)) {
-                PlaySound(engine_sound);
-            }
-        }
-        
-        // Keep water ambient sound looping
-        if (water_ambient.frameCount > 0 && !IsSoundPlaying(water_ambient)) {
-            PlaySound(water_ambient);
-        }
+        // Update game systems
+        game_update(game, delta_time);
 
-        // === RENDERING ===
-        renderer_clear(SKYBLUE);
-
-        // Draw ocean/water effect (darker blue rectangle as water)
-        DrawRectangle(0, 0, 1280, 720, (Color){65, 105, 225, 255}); // Royal blue for water
-
-        // Draw simple UI (only if help is not shown)
-        if (!debug_state.show_help) {
-            renderer_draw_text("MS Tour - Ship Control Prototype", 20, 20, 30, WHITE);
-            renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help", 20, 60, 20, LIGHTGRAY);
-        }
-
-        // === DRAW SHIP ===
-        // Ship dimensions
-        float ship_length = 80.0f;
-        float ship_width = 40.0f;
-        
-        // Calculate ship vertices for triangle (pointing in heading direction)
-        // Ship heading: 0° = north (up), rotating clockwise
-        Vector2 ship_pos = {ship.pos_x, ship.pos_y};
-        
-        // Simple triangle ship representation
-        // Front point (bow)
-        float bow_angle = (ship.heading - 90.0f) * DEG2RAD;
-        Vector2 bow = {
-            ship_pos.x + cosf(bow_angle) * ship_length * 0.6f,
-            ship_pos.y + sinf(bow_angle) * ship_length * 0.6f
-        };
-        
-        // Rear points (stern)
-        float stern_angle_left = (ship.heading - 90.0f + 150.0f) * DEG2RAD;
-        float stern_angle_right = (ship.heading - 90.0f - 150.0f) * DEG2RAD;
-        Vector2 stern_left = {
-            ship_pos.x + cosf(stern_angle_left) * ship_width * 0.6f,
-            ship_pos.y + sinf(stern_angle_left) * ship_width * 0.6f
-        };
-        Vector2 stern_right = {
-            ship_pos.x + cosf(stern_angle_right) * ship_width * 0.6f,
-            ship_pos.y + sinf(stern_angle_right) * ship_width * 0.6f
-        };
-        
-        // Draw ship as triangle
-        DrawTriangle(stern_left, stern_right, bow, RED);
-        DrawTriangleLines(stern_left, stern_right, bow, DARKGRAY);
-        
-        // Draw ship center point
-        DrawCircle((int)ship_pos.x, (int)ship_pos.y, 3.0f, YELLOW);
-
-        // === DEBUG VISUALIZATION ===
-        debug_tools_draw_visualization(&debug_state, &ship, &physics_config);
-
-        // === SHIP UI (gauges and indicators) ===
-        if (!debug_state.show_help && !debug_state.show_debug_panel) {
-            ship_ui_render(&ship, &telegraph);
-            
-            // Display frame info
-            char debug_text[256];
-            snprintf(debug_text, sizeof(debug_text), "FPS: %.1f | Frame: %llu", 
-                     1.0f / delta_time, 
-                     (unsigned long long)engine_state->frame_count);
-            renderer_draw_text(debug_text, 20, 680, 18, YELLOW);
-        }
-
-        // === DEBUG PANEL ===
-        debug_tools_draw_panel(&debug_state, &ship, &physics_config);
-
-        // === HELP OVERLAY (drawn last, on top of everything) ===
-        debug_tools_draw_help(&debug_state);
+        // Render game
+        game_render(game);
 
         engine_end_frame();
     }
 
     // Cleanup
-    if (telegraph_bell.frameCount > 0) UnloadSound(telegraph_bell);
-    if (engine_sound.frameCount > 0) UnloadSound(engine_sound);
-    if (water_ambient.frameCount > 0) UnloadSound(water_ambient);
-    CloseAudioDevice();
-    
     ship_ui_cleanup();
+    game_state_shutdown(game);
     renderer_shutdown();
     engine_shutdown();
 
-    printf("Ship control prototype shutdown complete\n");
+    printf("MS Tour shutdown complete\n");
 
     return 0;
 }

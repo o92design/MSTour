@@ -1,24 +1,9 @@
 #include "ship_physics.h"
+#include "engine_math.h"
+#include "game_ship_ecs.h"
 #include <raylib.h>
 #include <math.h>
 #include <string.h>
-
-// Helper function: Lerp between two values
-static float lerp(float a, float b, float t) {
-    return a + (b - a) * t;
-}
-
-// Helper function: Clamp value between min and max
-static float clamp(float value, float min, float max) {
-    if (value < min) return min;
-    if (value > max) return max;
-    return value;
-}
-
-// Helper function: Convert degrees to radians
-static float deg_to_rad(float degrees) {
-    return degrees * (PI / 180.0f);
-}
 
 void ship_physics_init(ShipState* state, float x, float y, float heading) {
     memset(state, 0, sizeof(ShipState));
@@ -28,35 +13,38 @@ void ship_physics_init(ShipState* state, float x, float y, float heading) {
 }
 
 ShipPhysicsConfig ship_physics_get_default_config(void) {
+    // Use game-layer ship ECS defaults as single source of truth
+    ShipEcsConfig ecs_defaults = ship_ecs_get_default_config();
+    
     ShipPhysicsConfig config = {
         // Linear Movement
-        .max_speed = 150.0f,
-        .acceleration = 45.0f,
-        .deceleration = 2.0f,
-        .reverse_speed_multiplier = 0.35f,
-        .reverse_accel_multiplier = 0.5f,
+        .max_speed = ecs_defaults.max_speed,
+        .acceleration = ecs_defaults.acceleration,
+        .deceleration = 2.0f,  // Not in ECS config (legacy only)
+        .reverse_speed_multiplier = ecs_defaults.reverse_speed_mult,
+        .reverse_accel_multiplier = ecs_defaults.reverse_accel_mult,
         
         // Rotational Movement
-        .max_turn_rate = 40.0f,
-        .turn_accel = 80.0f,
-        .speed_turn_factor = 0.65f,
+        .max_turn_rate = ecs_defaults.turn_rate,
+        .turn_accel = 80.0f,  // Not in ECS config (legacy only)
+        .speed_turn_factor = ecs_defaults.speed_turn_factor,
         
         // Momentum & Drift
-        .coast_friction = 0.015f,
-        .drift_factor = 0.25f,
-        .momentum_retention = 0.96f,
+        .coast_friction = ecs_defaults.coast_friction,
+        .drift_factor = ecs_defaults.drift_factor,
+        .momentum_retention = 0.96f,  // Not in ECS config (legacy only)
         
         // Responsiveness
-        .throttle_response_time = 0.4f,
-        .steering_response_time = 0.25f
+        .throttle_response_time = ecs_defaults.throttle_response,
+        .steering_response_time = ecs_defaults.steering_response
     };
     return config;
 }
 
 void ship_physics_process_actions(ShipState* state, float throttle_input, float rudder_input) {
     // Clamp inputs to valid range
-    state->target_throttle = clamp(throttle_input, -1.0f, 1.0f);
-    state->target_rudder = clamp(rudder_input, -1.0f, 1.0f);
+    state->target_throttle = math_clamp(throttle_input, -1.0f, 1.0f);
+    state->target_rudder = math_clamp(rudder_input, -1.0f, 1.0f);
 }
 
 void ship_physics_smooth_inputs(ShipState* state, const ShipPhysicsConfig* config, float delta_time) {
@@ -70,12 +58,12 @@ void ship_physics_smooth_inputs(ShipState* state, const ShipPhysicsConfig* confi
         : 1.0f;
     
     // Clamp rates to [0, 1] to avoid overshooting
-    throttle_rate = clamp(throttle_rate, 0.0f, 1.0f);
-    steering_rate = clamp(steering_rate, 0.0f, 1.0f);
+    throttle_rate = math_clamp(throttle_rate, 0.0f, 1.0f);
+    steering_rate = math_clamp(steering_rate, 0.0f, 1.0f);
     
     // Smoothly interpolate from current to target
-    state->throttle = lerp(state->throttle, state->target_throttle, throttle_rate);
-    state->rudder = lerp(state->rudder, state->target_rudder, steering_rate);
+    state->throttle = math_lerp(state->throttle, state->target_throttle, throttle_rate);
+    state->rudder = math_lerp(state->rudder, state->target_rudder, steering_rate);
 }
 
 void ship_physics_apply_acceleration(ShipState* state, const ShipPhysicsConfig* config, float delta_time) {
@@ -155,7 +143,7 @@ void ship_physics_apply_rotation(ShipState* state, const ShipPhysicsConfig* conf
     if (fabs(state->angular_velocity) > 0.1f && fabs(state->speed) > 0.1f) {
         // Calculate perpendicular direction (outward from turn)
         float drift_angle = state->heading + (state->angular_velocity > 0 ? 90.0f : -90.0f);
-        float drift_rad = deg_to_rad(drift_angle);
+        float drift_rad = math_deg_to_rad(drift_angle);
         
         // Drift magnitude based on turn rate and speed
         float drift_magnitude = config->drift_factor * fabs(state->angular_velocity) * 
@@ -194,7 +182,7 @@ void ship_physics_apply_friction(ShipState* state, const ShipPhysicsConfig* conf
 
 void ship_physics_update_position(ShipState* state, float delta_time) {
     // Convert heading to radians (0° = north, so we subtract 90° to align with standard coords)
-    float heading_rad = deg_to_rad(state->heading - 90.0f);
+    float heading_rad = math_deg_to_rad(state->heading - 90.0f);
     
     // Calculate forward velocity from speed and heading
     float forward_vel_x = cos(heading_rad) * state->speed;
