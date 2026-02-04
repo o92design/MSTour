@@ -170,6 +170,9 @@ bool poi_ecs_is_discovered(const POIEcsWorld* poi_world, int poi_index);
 // Mark POI as visited
 void poi_ecs_set_visited(POIEcsWorld* poi_world, int poi_index, bool visited);
 
+// Reset all visited states (for restarting tours)
+void poi_ecs_reset_all_visited(POIEcsWorld* poi_world);
+
 // Mark POI as discovered
 void poi_ecs_set_discovered(POIEcsWorld* poi_world, int poi_index, bool discovered);
 

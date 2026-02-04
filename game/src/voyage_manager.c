@@ -63,10 +63,17 @@ void voyage_update(float delta_time) {
 }
 
 void voyage_start(void) {
-    if (g_voyage.state == VOYAGE_STATE_START) {
-        g_voyage.state = VOYAGE_STATE_NAVIGATE;
-        g_voyage.voyage_active = true;
-        g_voyage.state_timer = 0.0f;
+    g_voyage.state = VOYAGE_STATE_NAVIGATE;
+    g_voyage.current_poi_index = 0;
+    g_voyage.voyage_duration = 0.0f;
+    g_voyage.voyage_active = true;
+    g_voyage.state_timer = 0.0f;
+    
+    // Clear all POI satisfaction scores
+    if (g_voyage.poi_satisfaction_scores) {
+        for (int i = 0; i < g_voyage.total_pois; i++) {
+            g_voyage.poi_satisfaction_scores[i] = 0.0f;
+        }
     }
 }
 

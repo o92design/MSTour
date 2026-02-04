@@ -180,6 +180,14 @@ void poi_ecs_set_visited(POIEcsWorld* poi_world, int poi_index, bool visited) {
     poi_world->pois.visited[poi_index] = visited;
 }
 
+void poi_ecs_reset_all_visited(POIEcsWorld* poi_world) {
+    if (!poi_world || !poi_world->initialized) return;
+    
+    for (uint32_t i = 0; i < poi_world->poi_count; i++) {
+        poi_world->pois.visited[i] = false;
+    }
+}
+
 void poi_ecs_set_discovered(POIEcsWorld* poi_world, int poi_index, bool discovered) {
     if (!poi_ecs_is_valid(poi_world, poi_index)) return;
     poi_world->pois.discovered[poi_index] = discovered;

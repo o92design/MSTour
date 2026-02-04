@@ -162,12 +162,16 @@ void game_state_reset(GameState* state) {
     // Reset camera
     camera_set_position(&state->camera, center_x, center_y);
     
-    // Restart voyage (results screen should already be hidden by caller)
+    // Reset POI visited states and fog of war
+    poi_ecs_reset_all_visited(&state->game_ecs.poi_world);
+    fog_reset(&state->game_ecs.fog);
+    
+    // Restart voyage and satisfaction tracking (results screen should already be hidden by caller)
     voyage_start();
     satisfaction_tour_start(&state->game_ecs.tour);
     state->voyage_active = true;
     
-    printf("Game state reset - voyage restarted\n");
+    printf("Game state reset - voyage restarted, POIs cleared, fog reset\n");
 }
 
 GameState* game_get_state(void) {
