@@ -30,8 +30,8 @@ static void on_poi_visit(int poi_index, Entity visitor, void* user_data) {
         // Advance to next POI in voyage
         voyage_advance_to_next_poi();
         
-        printf("  Voyage progress: POI %d/%d complete\n", 
-               voyage_get_current_poi_index() + 1, voyage_get_progress()->total_pois);
+        printf("  Voyage progress: %d/%d POIs complete\n", 
+               voyage_get_current_poi_index(), voyage_get_progress()->total_pois);
     }
 }
 
