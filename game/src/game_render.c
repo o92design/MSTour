@@ -324,10 +324,12 @@ void game_render_ui(const GameState* state) {
             // Current satisfaction (if POI in progress)
             if (progress->current_poi_index >= 0 && progress->current_poi_index < progress->total_pois) {
                 float current_sat = progress->poi_satisfaction_scores[progress->current_poi_index];
+                // Convert from 0.0-1.0 range to percentage
+                float sat_percent = current_sat * 100.0f;
                 char sat_text[64];
-                snprintf(sat_text, sizeof(sat_text), "Satisfaction: %.0f%%", current_sat);
-                Color sat_color = current_sat >= 80 ? GREEN : 
-                                 current_sat >= 60 ? YELLOW : ORANGE;
+                snprintf(sat_text, sizeof(sat_text), "Satisfaction: %.0f%%", sat_percent);
+                Color sat_color = sat_percent >= 80 ? GREEN : 
+                                 sat_percent >= 60 ? YELLOW : ORANGE;
                 renderer_draw_text(sat_text, hud_x, hud_y + 55, 18, sat_color);
             }
             

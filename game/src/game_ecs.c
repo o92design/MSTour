@@ -24,7 +24,8 @@ static void on_poi_visit(int poi_index, Entity visitor, void* user_data) {
         
         // Update voyage manager with current satisfaction
         int current_satisfaction = satisfaction_calculate_score(&state->tour);
-        voyage_record_poi_satisfaction((float)current_satisfaction);
+        // Convert satisfaction score (0-100) to voyage range (0.0-1.0)
+        voyage_record_poi_satisfaction((float)current_satisfaction / 100.0f);
         
         // Advance to next POI in voyage
         voyage_advance_to_next_poi();

@@ -154,17 +154,21 @@ void game_update_debug(GameState* state) {
         }
     }
     if (IsKeyPressed(KEY_F9)) {
-        // Debug: Toggle results screen with test data (for UI testing)
+        // Debug: Toggle results screen showing CURRENT voyage data
         if (state->results_showing) {
             printf("Debug: Hiding results screen\n");
             state->results_showing = false;
             results_screen_hide();
         } else {
-            printf("Debug: Showing test results screen\n");
-            // Create test data for results screen UI testing
-            // Note: Satisfaction values are 0.0-1.0 range (0.75 = 75%)
-            float test_scores[] = {0.75f, 0.88f, 0.95f};
-            results_screen_show("Debug Test Route", test_scores, 3, 245.5f);
+            printf("Debug: Showing current voyage results\n");
+            // Show results with CURRENT voyage data (not test data)
+            const VoyageProgress* progress = voyage_get_progress();
+            results_screen_show(
+                "Current Voyage Progress",
+                progress->poi_satisfaction_scores,
+                progress->total_pois,
+                progress->voyage_duration
+            );
             state->results_showing = true;
         }
     }
