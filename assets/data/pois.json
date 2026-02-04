@@ -1,0 +1,106 @@
+{
+  "version": "1.0",
+  "description": "Points of Interest in the Gothenburg Archipelago",
+  "pois": [
+    {
+      "id": "poi_vinga",
+      "name": "Vinga Lighthouse",
+      "type": "historical",
+      "tier": "special",
+      "position": { "x": 3200.0, "y": -800.0 },
+      "radius": 80.0,
+      "satisfaction_bonus": 20,
+      "description": "Historic lighthouse marking the entrance to Gothenburg harbor"
+    },
+    {
+      "id": "poi_styrsö",
+      "name": "Styrsö Village",
+      "type": "historical",
+      "tier": "general",
+      "position": { "x": 1200.0, "y": 800.0 },
+      "radius": 60.0,
+      "satisfaction_bonus": 8,
+      "description": "Traditional fishing village with charming wooden houses"
+    },
+    {
+      "id": "poi_vrångö_nature",
+      "name": "Vrångö Nature Reserve",
+      "type": "nature",
+      "tier": "special",
+      "position": { "x": 2400.0, "y": 1800.0 },
+      "radius": 100.0,
+      "satisfaction_bonus": 18,
+      "description": "Pristine nature reserve with rare bird species"
+    },
+    {
+      "id": "poi_donsö_cliffs",
+      "name": "Donsö Cliffs",
+      "type": "nature",
+      "tier": "general",
+      "position": { "x": -600.0, "y": 1400.0 },
+      "radius": 70.0,
+      "satisfaction_bonus": 6,
+      "description": "Scenic granite cliffs with panoramic views"
+    },
+    {
+      "id": "poi_känsö_fortress",
+      "name": "Känsö Fortress",
+      "type": "military",
+      "tier": "special",
+      "position": { "x": -1200.0, "y": -400.0 },
+      "radius": 75.0,
+      "satisfaction_bonus": 15,
+      "description": "Historic quarantine fortress from the 18th century"
+    },
+    {
+      "id": "poi_älvsborg",
+      "name": "Älvsborg Fortress",
+      "type": "military",
+      "tier": "special",
+      "position": { "x": -800.0, "y": 200.0 },
+      "radius": 90.0,
+      "satisfaction_bonus": 22,
+      "description": "Famous fortress guarding the entrance to Gothenburg"
+    },
+    {
+      "id": "poi_brännö_beach",
+      "name": "Brännö Beach",
+      "type": "nature",
+      "tier": "general",
+      "position": { "x": 1800.0, "y": -200.0 },
+      "radius": 55.0,
+      "satisfaction_bonus": 5,
+      "description": "Popular sandy beach with calm waters"
+    },
+    {
+      "id": "poi_köpstadsö",
+      "name": "Köpstadsö Fishing Harbor",
+      "type": "historical",
+      "tier": "general",
+      "position": { "x": 800.0, "y": -1000.0 },
+      "radius": 50.0,
+      "satisfaction_bonus": 7,
+      "description": "Authentic working fishing harbor"
+    },
+    {
+      "id": "poi_rivö_cove",
+      "name": "Rivö Hidden Cove",
+      "type": "nature",
+      "tier": "general",
+      "position": { "x": 2800.0, "y": 600.0 },
+      "radius": 45.0,
+      "satisfaction_bonus": 6,
+      "description": "Secluded cove perfect for swimming"
+    },
+    {
+      "id": "poi_galterö_battery",
+      "name": "Galterö Gun Battery",
+      "type": "military",
+      "tier": "general",
+      "position": { "x": -400.0, "y": -1200.0 },
+      "radius": 60.0,
+      "satisfaction_bonus": 8,
+      "description": "Coastal defense position from the 19th century"
+    }
+  ]
+}

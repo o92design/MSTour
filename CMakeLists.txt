@@ -48,6 +48,25 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Fetch cJSON (for JSON parsing - POI system, moddability)
+# Use header-only mode to avoid build conflicts
+message(STATUS "Fetching cJSON...")
+FetchContent_Declare(
+    cjson
+    GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
+    GIT_TAG v1.7.17
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)
+FetchContent_GetProperties(cjson)
+if(NOT cjson_POPULATED)
+    FetchContent_Populate(cjson)
+endif()
+
+# Create interface library for cJSON (single-file library approach)
+add_library(cjson_header INTERFACE)
+target_include_directories(cjson_header INTERFACE ${cjson_SOURCE_DIR})
+
 # Enable testing
 enable_testing()
 

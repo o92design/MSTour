@@ -16,10 +16,14 @@ file(GLOB_RECURSE GAME_SOURCES
 set(GAME_MAIN_SOURCE "${CMAKE_SOURCE_DIR}/game/src/main.c")
 list(REMOVE_ITEM GAME_SOURCES "${GAME_MAIN_SOURCE}")
 
+# Get cJSON source
+set(CJSON_SOURCE ${cjson_SOURCE_DIR}/cJSON.c)
+
 # Create test executable
 add_executable(MSTour_tests
     ${TEST_SOURCES}
     ${GAME_SOURCES}
+    ${CJSON_SOURCE}
 )
 
 # Include directories
@@ -33,6 +37,7 @@ target_include_directories(MSTour_tests
 target_link_libraries(MSTour_tests
     PRIVATE
         engine
+        cjson_header
         GTest::gtest_main
 )
 

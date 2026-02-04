@@ -4,6 +4,9 @@
 #include "engine_ecs.h"
 #include "game_ship_ecs.h"
 #include "game_ai_ecs.h"
+#include "game_poi_ecs.h"
+#include "game_fog_of_war.h"
+#include "game_satisfaction.h"
 #include "ship_physics.h"
 #include <stdbool.h>
 
@@ -12,7 +15,7 @@
 // 
 // Provides game-specific entity factories and utilities built on top of
 // the engine's generic ECS system. Coordinates between engine ECS (Transform,
-// Velocity) and game-layer ECS (Ship, AI).
+// Velocity) and game-layer ECS (Ship, AI, POI).
 // =============================================================================
 
 // =============================================================================
@@ -23,6 +26,9 @@ typedef struct GameEcsState {
     ECSWorld* ecs_world;        // Pointer to engine ECS world
     ShipEcsWorld ship_world;    // Game-layer ship components
     AIEcsWorld ai_world;        // Game-layer AI components
+    POIEcsWorld poi_world;      // Game-layer POI components
+    FogOfWarState fog;          // Fog of war visibility
+    TourSatisfaction tour;      // Current tour satisfaction tracking
 } GameEcsState;
 
 // =============================================================================
@@ -100,5 +106,24 @@ void game_ecs_to_ship_state(const GameEcsState* state, Entity ship, ShipState* o
 
 // Copy legacy ShipState to ECS entity (for initialization)
 void game_ecs_from_ship_state(GameEcsState* state, Entity ship, const ShipState* ship_state);
+
+// =============================================================================
+// POI Functions
+// =============================================================================
+
+// Load POIs from file (call after init)
+bool game_ecs_load_pois(GameEcsState* state, const char* filepath);
+
+// Get POI world for queries
+POIEcsWorld* game_ecs_get_poi_world(GameEcsState* state);
+const POIEcsWorld* game_ecs_get_poi_world_const(const GameEcsState* state);
+
+// Get fog of war state
+FogOfWarState* game_ecs_get_fog(GameEcsState* state);
+const FogOfWarState* game_ecs_get_fog_const(const GameEcsState* state);
+
+// Get tour satisfaction
+TourSatisfaction* game_ecs_get_tour(GameEcsState* state);
+const TourSatisfaction* game_ecs_get_tour_const(const GameEcsState* state);
 
 #endif // GAME_ECS_H

@@ -1,4 +1,5 @@
 #include "game_state.h"
+#include "game_poi_loader.h"
 #include "config.h"
 #include "game_constants.h"
 #include "engine_core.h"
@@ -86,6 +87,15 @@ bool game_state_init(GameState* state, const ConfigFile* config) {
     
     // Initialize debug tools
     debug_tools_init(&state->debug);
+    
+    // Load POIs
+    if (!game_ecs_load_pois(&state->game_ecs, NULL)) {
+        printf("Warning: Using default POIs\n");
+    }
+    
+    // Start a demo tour for satisfaction tracking
+    satisfaction_tour_start(&state->game_ecs.tour);
+    printf("Demo tour started - visit POIs to earn satisfaction!\n");
     
     state->initialized = true;
     state->paused = false;

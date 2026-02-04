@@ -11,10 +11,14 @@ file(GLOB_RECURSE GAME_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
+# Get cJSON source (it's not header-only)
+set(CJSON_SOURCE ${cjson_SOURCE_DIR}/cJSON.c)
+
 # Create game executable
 add_executable(MSTour
     ${GAME_SOURCES}
     ${GAME_HEADERS}
+    ${CJSON_SOURCE}
 )
 
 # Include directories
@@ -27,6 +31,7 @@ target_include_directories(MSTour
 target_link_libraries(MSTour
     PRIVATE
         engine
+        cjson_header
 )
 
 # Set output directory for the executable

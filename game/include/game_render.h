@@ -17,6 +17,9 @@ void game_render_world(const GameState* state);
 // Render all ships
 void game_render_ships(const GameState* state);
 
+// Render Points of Interest
+void game_render_pois(const GameState* state);
+
 // Render UI elements
 void game_render_ui(const GameState* state);
 

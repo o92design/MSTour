@@ -1,6 +1,27 @@
 #include "game_ecs.h"
+#include "game_poi_loader.h"
 #include <string.h>
 #include <stdio.h>
+
+// =============================================================================
+// POI Visit Callback
+// =============================================================================
+
+static void on_poi_visit(int poi_index, Entity visitor, void* user_data) {
+    GameEcsState* state = (GameEcsState*)user_data;
+    if (!state) return;
+    
+    const char* name = poi_ecs_get_name(&state->poi_world, poi_index);
+    printf("POI Visit: Ship %u visited '%s'\n", visitor, name);
+    
+    // Record for tour satisfaction
+    if (satisfaction_tour_is_active(&state->tour)) {
+        int bonus = satisfaction_record_poi_visit(&state->tour, &state->poi_world, poi_index);
+        if (bonus > 0) {
+            printf("  Satisfaction bonus: +%d\n", bonus);
+        }
+    }
+}
 
 // =============================================================================
 // Game ECS Lifecycle
@@ -13,13 +34,20 @@ void game_ecs_init(GameEcsState* state, ECSWorld* ecs_world) {
     ecs_world_init(ecs_world);
     ship_ecs_init(&state->ship_world);
     ai_ecs_init(&state->ai_world);
+    poi_ecs_init(&state->poi_world);
+    fog_init(&state->fog);
     
-    printf("Game ECS: Initialized with ship and AI sub-worlds\n");
+    // Initialize tour (not active until explicitly started)
+    memset(&state->tour, 0, sizeof(TourSatisfaction));
+    
+    printf("Game ECS: Initialized with ship, AI, and POI sub-worlds\n");
 }
 
 void game_ecs_shutdown(GameEcsState* state) {
     if (!state) return;
     
+    fog_shutdown(&state->fog);
+    poi_ecs_shutdown(&state->poi_world);
     ai_ecs_shutdown(&state->ai_world);
     ship_ecs_shutdown(&state->ship_world);
     if (state->ecs_world) {
@@ -196,6 +224,17 @@ void game_ecs_update(GameEcsState* state, float delta_time) {
     
     // 3. Update movement (applies velocity to transform)
     ecs_system_movement(state->ecs_world, delta_time);
+    
+    // 4. Update POI visits
+    POISystemContext poi_ctx = {
+        .on_visit = on_poi_visit,
+        .user_data = state
+    };
+    poi_ecs_system_update(&state->poi_world, state->ecs_world, COMPONENT_SHIP, &poi_ctx);
+    
+    // 5. Update fog of war
+    fog_system_update(&state->fog, &state->poi_world, state->ecs_world, 
+                      COMPONENT_SHIP, delta_time);
 }
 
 // =============================================================================
@@ -242,4 +281,57 @@ void game_ecs_from_ship_state(GameEcsState* state, Entity ship, const ShipState*
     state->ship_world.ships.target_throttle[ship] = ship_state->target_throttle;
     state->ship_world.ships.rudder[ship] = ship_state->rudder;
     state->ship_world.ships.target_rudder[ship] = ship_state->target_rudder;
+}
+
+// =============================================================================
+// POI Functions
+// =============================================================================
+
+bool game_ecs_load_pois(GameEcsState* state, const char* filepath) {
+    if (!state) return false;
+    
+    POILoadResult result = poi_load_from_file(&state->poi_world, filepath);
+    
+    if (result != POI_LOAD_SUCCESS) {
+        printf("Game ECS: Failed to load POIs from '%s': %s\n", 
+               filepath ? filepath : "(default)", 
+               poi_load_result_to_string(result));
+        
+        // Fall back to defaults
+        poi_load_defaults(&state->poi_world);
+        return false;
+    }
+    
+    printf("Game ECS: Loaded %u POIs\n", poi_ecs_get_count(&state->poi_world));
+    return true;
+}
+
+POIEcsWorld* game_ecs_get_poi_world(GameEcsState* state) {
+    if (!state) return NULL;
+    return &state->poi_world;
+}
+
+const POIEcsWorld* game_ecs_get_poi_world_const(const GameEcsState* state) {
+    if (!state) return NULL;
+    return &state->poi_world;
+}
+
+FogOfWarState* game_ecs_get_fog(GameEcsState* state) {
+    if (!state) return NULL;
+    return &state->fog;
+}
+
+const FogOfWarState* game_ecs_get_fog_const(const GameEcsState* state) {
+    if (!state) return NULL;
+    return &state->fog;
+}
+
+TourSatisfaction* game_ecs_get_tour(GameEcsState* state) {
+    if (!state) return NULL;
+    return &state->tour;
+}
+
+const TourSatisfaction* game_ecs_get_tour_const(const GameEcsState* state) {
+    if (!state) return NULL;
+    return &state->tour;
 }

@@ -87,6 +87,26 @@ void game_update_camera(GameState* state, float delta_time) {
     
     // Set camera target to follow ship
     camera_set_target(&state->camera, ship_x, ship_y);
+    
+    // Handle zoom input
+    float scroll = GetMouseWheelMove();
+    if (scroll != 0.0f) {
+        camera_zoom(&state->camera, &state->camera_config, scroll * 0.1f);
+    }
+    
+    // Keyboard zoom controls
+    if (IsKeyDown(KEY_EQUAL) || IsKeyDown(KEY_KP_ADD)) {
+        camera_zoom(&state->camera, &state->camera_config, 1.0f * delta_time);
+    }
+    if (IsKeyDown(KEY_MINUS) || IsKeyDown(KEY_KP_SUBTRACT)) {
+        camera_zoom(&state->camera, &state->camera_config, -1.0f * delta_time);
+    }
+    
+    // Reset zoom with 0
+    if (IsKeyPressed(KEY_ZERO) || IsKeyPressed(KEY_KP_0)) {
+        camera_set_zoom(&state->camera, &state->camera_config, 1.0f);
+    }
+    
     camera_update(&state->camera, &state->camera_config, delta_time);
 }
 
