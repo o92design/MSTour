@@ -318,20 +318,18 @@ void game_render_ui(const GameState* state) {
             // POI counter
             char poi_text[64];
             snprintf(poi_text, sizeof(poi_text), "POIs: %d / %d", 
-                     progress->current_poi_index + 1, progress->total_pois);
+                     progress->current_poi_index, progress->total_pois);
             renderer_draw_text(poi_text, hud_x, hud_y + 30, 18, WHITE);
             
-            // Current satisfaction (if POI in progress)
-            if (progress->current_poi_index >= 0 && progress->current_poi_index < progress->total_pois) {
-                float current_sat = progress->poi_satisfaction_scores[progress->current_poi_index];
-                // Convert from 0.0-1.0 range to percentage
-                float sat_percent = current_sat * 100.0f;
-                char sat_text[64];
-                snprintf(sat_text, sizeof(sat_text), "Satisfaction: %.0f%%", sat_percent);
-                Color sat_color = sat_percent >= 80 ? GREEN : 
-                                 sat_percent >= 60 ? YELLOW : ORANGE;
-                renderer_draw_text(sat_text, hud_x, hud_y + 55, 18, sat_color);
-            }
+            // Overall satisfaction (average of all completed POIs)
+            float avg_satisfaction = voyage_get_average_satisfaction();
+            float avg_percent = avg_satisfaction * 100.0f;
+            char sat_text[64];
+            snprintf(sat_text, sizeof(sat_text), "Satisfaction: %.0f%%", avg_percent);
+            Color sat_color = avg_percent >= 80 ? GREEN : 
+                             avg_percent >= 60 ? YELLOW : 
+                             avg_percent > 0 ? ORANGE : GRAY;
+            renderer_draw_text(sat_text, hud_x, hud_y + 55, 18, sat_color);
             
             // Duration
             int minutes = (int)(progress->voyage_duration / 60.0f);
