@@ -133,8 +133,15 @@ def get_page_content(page_identifier):
         print(f"[ERROR] Failed to fetch page content: {e}")
         return None
 
-def create_page(title, content, parent_id):
-    """Create a new Confluence page as child of parent"""
+def create_page(title, content, parent_id=None):
+    """
+    Create a new Confluence page
+    
+    Args:
+        title: Page title
+        content: HTML content in Confluence storage format
+        parent_id: Parent page ID (if None, creates top-level page)
+    """
     url = f"{CONFLUENCE_BASE_URL}/wiki/rest/api/content"
     
     headers = {
@@ -147,7 +154,6 @@ def create_page(title, content, parent_id):
         'type': 'page',
         'title': title,
         'space': {'key': CONFLUENCE_SPACE_KEY},
-        'ancestors': [{'id': str(parent_id)}],
         'body': {
             'storage': {
                 'value': content,
@@ -156,11 +162,16 @@ def create_page(title, content, parent_id):
         }
     }
     
+    # Only add ancestors if parent_id is specified
+    if parent_id is not None:
+        payload['ancestors'] = [{'id': str(parent_id)}]
+    
     try:
         response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
         result = response.json()
-        print(f"[OK] Created page: '{title}' (ID: {result['id']})")
+        parent_info = f" as child of page {parent_id}" if parent_id else " at top level"
+        print(f"[OK] Created page: '{title}' (ID: {result['id']}){parent_info}")
         return result
     except requests.exceptions.RequestException as e:
         print(f"[ERROR] Failed to create page: {e}")
@@ -199,6 +210,44 @@ def update_page(page_id, title, content, current_version):
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"[ERROR] Failed to update page: {e}")
+        if hasattr(e, 'response') and e.response:
+            print(f"   Response: {e.response.text}")
+        return None
+
+def move_page(page_id, new_parent_id):
+    """Move a page to a new parent"""
+    # First get current page info
+    page = get_page(page_id)
+    if not page:
+        print(f"[ERROR] Cannot find page {page_id}")
+        return None
+    
+    url = f"{CONFLUENCE_BASE_URL}/wiki/rest/api/content/{page_id}"
+    
+    headers = {
+        'Authorization': get_auth_header(),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    
+    payload = {
+        'id': str(page_id),
+        'type': 'page',
+        'title': page['title'],
+        'ancestors': [{'id': str(new_parent_id)}],
+        'version': {
+            'number': page['version']['number'] + 1
+        }
+    }
+    
+    try:
+        response = requests.put(url, json=payload, headers=headers)
+        response.raise_for_status()
+        result = response.json()
+        print(f"[OK] Moved '{page['title']}' to parent {new_parent_id}")
+        return result
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Failed to move page: {e}")
         if hasattr(e, 'response') and e.response:
             print(f"   Response: {e.response.text}")
         return None

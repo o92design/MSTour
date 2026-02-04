@@ -46,6 +46,17 @@ GDD_PAGES = {
     'MVP Test Scenarios & Playtesting Guide': 3112963,
     'MVP Technical Requirements': 3080194,
     'Vertical Slice Milestones & Deliverables': 3080209,
+    
+    # Technical Documentation (top-level)
+    'Technical Documentation': 4358166,
+    'POI & Discovery System': 4390913,
+    'POI System - Technical Implementation': 4423681,
+    'Fog of War System - Technical Implementation': 4456449,
+    'Spatial Hash & Chunk Systems': 4489217,
+    
+    # Modding Documentation (top-level)
+    'Modding Documentation': 4358182,
+    'POI Modding Guide': 4358146,
 }
 
 # Page aliases (alternative names that map to canonical pages)
