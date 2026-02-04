@@ -162,7 +162,8 @@ void game_update_debug(GameState* state) {
         } else {
             printf("Debug: Showing test results screen\n");
             // Create test data for results screen UI testing
-            float test_scores[] = {75.0f, 88.0f, 95.0f};
+            // Note: Satisfaction values are 0.0-1.0 range (0.75 = 75%)
+            float test_scores[] = {0.75f, 0.88f, 0.95f};
             results_screen_show("Debug Test Route", test_scores, 3, 245.5f);
             state->results_showing = true;
         }
