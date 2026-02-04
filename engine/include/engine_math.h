@@ -71,6 +71,18 @@ static inline float math_abs(float value) {
     return (value < 0.0f) ? -value : value;
 }
 
+// Squared distance between two 2D points (avoids sqrt for comparisons)
+static inline float math_distance_sq(float x1, float y1, float x2, float y2) {
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    return dx * dx + dy * dy;
+}
+
+// Distance between two 2D points
+static inline float math_distance(float x1, float y1, float x2, float y2) {
+    return sqrtf(math_distance_sq(x1, y1, x2, y2));
+}
+
 // Sign of a value (-1, 0, or 1)
 static inline float math_sign(float value) {
     if (value > 0.0f) return 1.0f;

@@ -180,7 +180,7 @@ void game_render_world(const GameState* state) {
     renderer_clear(water_color);
 }
 
-// Draw fog overlay using chunk-based system
+// Draw fog overlay using chunk-based system with batched rendering
 static void game_render_fog_overlay(const GameState* state) {
     if (!state) return;
     
@@ -189,6 +189,10 @@ static void game_render_fog_overlay(const GameState* state) {
     
     // Fog color from constants
     Color fog_color = {FOG_COLOR_R, FOG_COLOR_G, FOG_COLOR_B, FOG_COLOR_A};
+    
+    // Initialize rectangle batch for efficient rendering
+    RectBatch batch;
+    renderer_rect_batch_init(&batch, fog_color);
     
     // Get camera info to determine visible area
     float cam_x = state->camera.target.x;
@@ -219,16 +223,10 @@ static void game_render_fog_overlay(const GameState* state) {
             float chunk_origin_x = cx * FOG_CHUNK_WORLD_SIZE;
             float chunk_origin_y = cy * FOG_CHUNK_WORLD_SIZE;
             
-            // Find chunk (may not exist = all fogged)
-            const FogChunk* chunk = NULL;
-            for (int i = 0; i < fog->chunk_count; i++) {
-                if (fog->chunks[i].allocated && 
-                    fog->chunks[i].chunk_x == cx && 
-                    fog->chunks[i].chunk_y == cy) {
-                    chunk = &fog->chunks[i];
-                    break;
-                }
-            }
+            // Find chunk using spatial hash - O(1) lookup
+            uint16_t chunk_idx = spatial_hash_find(&fog->chunk_map, cx, cy);
+            const FogChunk* chunk = (chunk_idx != SPATIAL_HASH_NOT_FOUND) 
+                                    ? &fog->chunks[chunk_idx] : NULL;
             
             // Calculate cell range visible in this chunk
             int cell_min_x = (int)((world_left - chunk_origin_x) / FOG_CELL_SIZE);
@@ -241,7 +239,7 @@ static void game_render_fog_overlay(const GameState* state) {
             if (cell_max_x >= FOG_CHUNK_SIZE) cell_max_x = FOG_CHUNK_SIZE - 1;
             if (cell_max_y >= FOG_CHUNK_SIZE) cell_max_y = FOG_CHUNK_SIZE - 1;
             
-            // Draw fog for unrevealed cells
+            // Batch fog cells for this chunk
             for (int cell_y = cell_min_y; cell_y <= cell_max_y; cell_y++) {
                 for (int cell_x = cell_min_x; cell_x <= cell_max_x; cell_x++) {
                     // Cell is fogged if chunk doesn't exist OR cell not revealed
@@ -250,12 +248,20 @@ static void game_render_fog_overlay(const GameState* state) {
                     if (!is_revealed) {
                         int wx = (int)(chunk_origin_x + cell_x * FOG_CELL_SIZE);
                         int wy = (int)(chunk_origin_y + cell_y * FOG_CELL_SIZE);
-                        DrawRectangle(wx, wy, cell_size + 1, cell_size + 1, fog_color);
+                        
+                        // Add to batch (auto-flushes when full)
+                        if (!renderer_rect_batch_add(&batch, wx, wy, cell_size + 1, cell_size + 1)) {
+                            renderer_rect_batch_flush(&batch);
+                            renderer_rect_batch_add(&batch, wx, wy, cell_size + 1, cell_size + 1);
+                        }
                     }
                 }
             }
         }
     }
+    
+    // Flush any remaining rectangles
+    renderer_rect_batch_flush(&batch);
 }
 
 void game_render_ships(const GameState* state) {

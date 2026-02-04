@@ -1,26 +1,7 @@
 #include "game_fog_of_war.h"
+#include "engine_math.h"
 #include <string.h>
 #include <math.h>
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-static float distance_squared(float x1, float y1, float x2, float y2) {
-    float dx = x2 - x1;
-    float dy = y2 - y1;
-    return dx * dx + dy * dy;
-}
-
-static float clamp_f(float value, float min, float max) {
-    if (value < min) return min;
-    if (value > max) return max;
-    return value;
-}
-
-static float lerp_f(float a, float b, float t) {
-    return a + (b - a) * t;
-}
 
 // =============================================================================
 // Lifecycle
@@ -35,19 +16,23 @@ void fog_init(FogOfWarState* fog) {
     fog->discovery_radius = FOG_DISCOVERY_RADIUS;
     fog->enabled = true;
     fog->prototype_mode = true;  // Default to prototype mode (POIs shown on map but fogged)
-    fog->initialized = true;
     fog->chunk_count = 0;
     
+    // Initialize spatial hash for chunk lookups (capacity for max chunks * 2 for good load factor)
+    spatial_hash_init(&fog->chunk_map, FOG_MAX_CHUNKS * 2);
+    
     // Start all POIs as hidden with full fog
-    // (prototype_mode makes them visible on map but still fogged until approached)
     for (int i = 0; i < MAX_POIS; i++) {
         fog->poi_visibility[i] = VISIBILITY_HIDDEN;
         fog->poi_fog_alpha[i] = 1.0f;
     }
+    
+    fog->initialized = true;
 }
 
 void fog_shutdown(FogOfWarState* fog) {
     if (!fog) return;
+    spatial_hash_shutdown(&fog->chunk_map);
     fog->initialized = false;
 }
 
@@ -59,12 +44,13 @@ void fog_reset(FogOfWarState* fog) {
         fog->poi_fog_alpha[i] = 1.0f;
     }
     
-    // Reset all chunks
+    // Reset all chunks and clear hash map
     for (int i = 0; i < fog->chunk_count; i++) {
         fog->chunks[i].allocated = false;
     }
     fog->chunk_count = 0;
     fog->tracked_ship_count = 0;
+    spatial_hash_clear(&fog->chunk_map);
 }
 
 // =============================================================================
@@ -87,39 +73,27 @@ static void world_to_cell_in_chunk(float world_x, float world_y, int chunk_x, in
     *cell_y = (int)((world_y - chunk_origin_y) / FOG_CELL_SIZE);
     
     // Clamp to valid range
-    if (*cell_x < 0) *cell_x = 0;
-    if (*cell_x >= FOG_CHUNK_SIZE) *cell_x = FOG_CHUNK_SIZE - 1;
-    if (*cell_y < 0) *cell_y = 0;
-    if (*cell_y >= FOG_CHUNK_SIZE) *cell_y = FOG_CHUNK_SIZE - 1;
+    *cell_x = math_clamp_int(*cell_x, 0, FOG_CHUNK_SIZE - 1);
+    *cell_y = math_clamp_int(*cell_y, 0, FOG_CHUNK_SIZE - 1);
 }
 
-// Find chunk by coordinates, returns NULL if not allocated
+// Find chunk by coordinates using spatial hash - O(1) lookup
 static FogChunk* fog_find_chunk(FogOfWarState* fog, int chunk_x, int chunk_y) {
-    for (int i = 0; i < fog->chunk_count; i++) {
-        if (fog->chunks[i].allocated && 
-            fog->chunks[i].chunk_x == chunk_x && 
-            fog->chunks[i].chunk_y == chunk_y) {
-            return &fog->chunks[i];
-        }
-    }
-    return NULL;
+    uint16_t idx = spatial_hash_find(&fog->chunk_map, chunk_x, chunk_y);
+    if (idx == SPATIAL_HASH_NOT_FOUND) return NULL;
+    return &fog->chunks[idx];
 }
 
 // Find chunk (const version)
 static const FogChunk* fog_find_chunk_const(const FogOfWarState* fog, int chunk_x, int chunk_y) {
-    for (int i = 0; i < fog->chunk_count; i++) {
-        if (fog->chunks[i].allocated && 
-            fog->chunks[i].chunk_x == chunk_x && 
-            fog->chunks[i].chunk_y == chunk_y) {
-            return &fog->chunks[i];
-        }
-    }
-    return NULL;
+    uint16_t idx = spatial_hash_find(&fog->chunk_map, chunk_x, chunk_y);
+    if (idx == SPATIAL_HASH_NOT_FOUND) return NULL;
+    return &fog->chunks[idx];
 }
 
 // Get or create chunk at coordinates
 static FogChunk* fog_get_or_create_chunk(FogOfWarState* fog, int chunk_x, int chunk_y) {
-    // Try to find existing
+    // Try to find existing via hash - O(1)
     FogChunk* chunk = fog_find_chunk(fog, chunk_x, chunk_y);
     if (chunk) return chunk;
     
@@ -128,11 +102,15 @@ static FogChunk* fog_get_or_create_chunk(FogOfWarState* fog, int chunk_x, int ch
         return NULL;  // Out of chunks
     }
     
+    uint16_t new_idx = (uint16_t)fog->chunk_count;
     chunk = &fog->chunks[fog->chunk_count++];
     chunk->chunk_x = chunk_x;
     chunk->chunk_y = chunk_y;
     chunk->allocated = true;
     memset(chunk->cells, 0, sizeof(chunk->cells));  // All cells start fogged
+    
+    // Add to hash map for O(1) future lookups
+    spatial_hash_insert(&fog->chunk_map, chunk_x, chunk_y, new_idx);
     
     return chunk;
 }
@@ -201,7 +179,7 @@ bool fog_is_position_visible(const FogOfWarState* fog, const ECSWorld* ecs_world
         float ship_x = ecs_world->transforms.pos_x[e];
         float ship_y = ecs_world->transforms.pos_y[e];
         
-        float dist_sq = distance_squared(x, y, ship_x, ship_y);
+        float dist_sq = math_distance_sq(x, y, ship_x, ship_y);
         if (dist_sq <= reveal_radius_sq) {
             return true;
         }
@@ -262,10 +240,10 @@ void fog_reveal_area(FogOfWarState* fog, float x, float y, float radius) {
             int cell_max_y = (int)((max_y - chunk_origin_y) / FOG_CELL_SIZE);
             
             // Clamp to chunk bounds
-            if (cell_min_x < 0) cell_min_x = 0;
-            if (cell_min_y < 0) cell_min_y = 0;
-            if (cell_max_x >= FOG_CHUNK_SIZE) cell_max_x = FOG_CHUNK_SIZE - 1;
-            if (cell_max_y >= FOG_CHUNK_SIZE) cell_max_y = FOG_CHUNK_SIZE - 1;
+            cell_min_x = math_clamp_int(cell_min_x, 0, FOG_CHUNK_SIZE - 1);
+            cell_min_y = math_clamp_int(cell_min_y, 0, FOG_CHUNK_SIZE - 1);
+            cell_max_x = math_clamp_int(cell_max_x, 0, FOG_CHUNK_SIZE - 1);
+            cell_max_y = math_clamp_int(cell_max_y, 0, FOG_CHUNK_SIZE - 1);
             
             // Mark cells within radius
             for (int cell_y = cell_min_y; cell_y <= cell_max_y; cell_y++) {
@@ -274,7 +252,7 @@ void fog_reveal_area(FogOfWarState* fog, float x, float y, float radius) {
                     float cell_world_x = chunk_origin_x + (cell_x + 0.5f) * FOG_CELL_SIZE;
                     float cell_world_y = chunk_origin_y + (cell_y + 0.5f) * FOG_CELL_SIZE;
                     
-                    float dist_sq = distance_squared(x, y, cell_world_x, cell_world_y);
+                    float dist_sq = math_distance_sq(x, y, cell_world_x, cell_world_y);
                     if (dist_sq <= radius_sq) {
                         chunk->cells[cell_y][cell_x] = 1;
                     }
@@ -366,7 +344,7 @@ void fog_system_update(FogOfWarState* fog, const POIEcsWorld* poi_world,
         
         // Find closest ship to this POI (using cached positions)
         for (int s = 0; s < ship_count; s++) {
-            float dist_sq = distance_squared(poi_x, poi_y, ships[s].x, ships[s].y);
+            float dist_sq = math_distance_sq(poi_x, poi_y, ships[s].x, ships[s].y);
             if (dist_sq < min_dist_sq) {
                 min_dist_sq = dist_sq;
             }
@@ -398,10 +376,10 @@ void fog_system_update(FogOfWarState* fog, const POIEcsWorld* poi_world,
                 break;
         }
         
-        // Smooth interpolation
+        // Smooth interpolation using engine math
         float current_alpha = fog->poi_fog_alpha[i];
-        float new_alpha = lerp_f(current_alpha, target_alpha, FOG_FADE_SPEED * delta_time);
-        fog->poi_fog_alpha[i] = clamp_f(new_alpha, 0.0f, 1.0f);
+        float new_alpha = math_lerp(current_alpha, target_alpha, FOG_FADE_SPEED * delta_time);
+        fog->poi_fog_alpha[i] = math_clamp(new_alpha, 0.0f, 1.0f);
     }
 }
 

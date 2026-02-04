@@ -2,6 +2,7 @@
 #define GAME_FOG_OF_WAR_H
 
 #include "engine_ecs.h"
+#include "engine_spatial_hash.h"
 #include "game_poi_ecs.h"
 #include <stdbool.h>
 
@@ -76,6 +77,9 @@ typedef struct FogOfWarState {
     // Chunk-based revealed area tracking (dynamically allocated)
     FogChunk chunks[FOG_MAX_CHUNKS];
     int chunk_count;
+    
+    // Spatial hash for O(1) chunk lookup
+    SpatialHashMap chunk_map;
     
     // Ship position tracking for reveal optimization
     float last_reveal_x[FOG_MAX_TRACKED_SHIPS];
