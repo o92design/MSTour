@@ -45,7 +45,10 @@ static Color get_poi_color(POIType type, POITier tier, bool visited) {
     
     // Visited POIs are slightly faded
     if (visited) {
-        base.a = 180;
+        base.a = 200;
+    } else {
+        // Make unvisited POIs more visible
+        base.a = 220;
     }
     
     return base;
@@ -152,11 +155,19 @@ void game_render_pois(const GameState* state) {
         // In non-prototype mode, skip completely hidden POIs
         if (fog && !fog->prototype_mode && fog_alpha > 0.95f) continue;
         
-        // Draw radius indicator (subtle, only when somewhat visible)
+        // Draw radius indicator (more visible for unvisited POIs)
         if (fog_alpha < 0.8f) {
             float radius = poi_ecs_get_radius(poi_world, (int)i);
-            Color radius_color = {100, 100, 255, (unsigned char)(30 * (1.0f - fog_alpha))};
+            // Make detection zones much more visible
+            unsigned char zone_alpha = visited ? 20 : 50;
+            Color radius_color = {100, 200, 255, (unsigned char)(zone_alpha * (1.0f - fog_alpha))};
             DrawCircle((int)x, (int)y, radius, radius_color);
+            
+            // Add bright border for unvisited POIs
+            if (!visited) {
+                Color border = {150, 220, 255, (unsigned char)(120 * (1.0f - fog_alpha))};
+                DrawCircleLines((int)x, (int)y, radius, border);
+            }
         }
         
         // Draw POI icon
@@ -286,7 +297,7 @@ void game_render_ui(const GameState* state) {
         // Title and controls hint (top-left with margin)
         int margin = 20;
         renderer_draw_text("MS Tour - Ship Control Prototype", margin, margin, 30, WHITE);
-        renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help", margin, margin + 40, 20, LIGHTGRAY);
+        renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help | F8=Complete Voyage", margin, margin + 40, 20, LIGHTGRAY);
         
         // Ship UI (gauges and indicators) - uses engine_ui internally
         ship_ui_render(&state->player_ship, &state->telegraph);

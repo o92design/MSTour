@@ -146,6 +146,27 @@ void game_update_debug(GameState* state) {
         // Toggle ECS mode
         game_state_toggle_ecs(state);
     }
+    if (IsKeyPressed(KEY_F8)) {
+        // Debug: Complete voyage early (for testing results screen)
+        if (state->voyage_active) {
+            printf("Debug: Force completing voyage...\n");
+            voyage_set_state(VOYAGE_STATE_FINISH);
+        }
+    }
+    if (IsKeyPressed(KEY_F9)) {
+        // Debug: Toggle results screen visibility
+        if (state->results_showing) {
+            printf("Debug: Hiding results screen\n");
+            state->results_showing = false;
+            results_screen_hide();
+        } else {
+            printf("Debug: Showing test results screen\n");
+            // Create test data for results screen
+            float test_scores[] = {85.0f, 92.0f};
+            results_screen_show("Debug Test Route", test_scores, 2, 123.5f);
+            state->results_showing = true;
+        }
+    }
 }
 
 void game_update(GameState* state, float delta_time) {
