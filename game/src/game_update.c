@@ -154,17 +154,17 @@ void game_update_debug(GameState* state) {
         }
     }
     if (IsKeyPressed(KEY_F9)) {
-        // Debug: Toggle results screen visibility
+        // Debug: Toggle results screen visibility (only if voyage has run)
         if (state->results_showing) {
             printf("Debug: Hiding results screen\n");
             state->results_showing = false;
             results_screen_hide();
-        } else {
-            printf("Debug: Showing test results screen\n");
-            // Create test data for results screen
-            float test_scores[] = {85.0f, 92.0f};
-            results_screen_show("Debug Test Route", test_scores, 2, 123.5f);
+        } else if (!state->voyage_active && voyage_get_progress()->voyage_duration > 0) {
+            // Only show if voyage has completed at least once
+            printf("Debug: Re-showing results screen\n");
             state->results_showing = true;
+        } else {
+            printf("Debug: Complete a voyage first (press F8) before toggling results\n");
         }
     }
 }

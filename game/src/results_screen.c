@@ -197,8 +197,8 @@ void results_screen_render(void) {
                       (Color){130, 70, 70, 255} : (Color){90, 50, 50, 255};
     DrawRectangleRec(menu_btn, menu_color);
     DrawRectangleLinesEx(menu_btn, 2, (Color){200, 100, 100, 255});
-    const char* menu_text = "Return to Menu";
-    DrawText(menu_text, menu_btn.x + BUTTON_WIDTH / 2 - MeasureText(menu_text, 20) / 2, 
+    const char* menu_text = "Return to Game";
+    DrawText(menu_text, menu_btn.x + BUTTON_WIDTH / 2 - MeasureText(menu_text, 20) / 2,
              menu_btn.y + 15, 20, WHITE);
 }
 

@@ -162,11 +162,16 @@ void game_state_reset(GameState* state) {
     // Reset camera
     camera_set_position(&state->camera, center_x, center_y);
     
+    // Hide results screen if showing
+    if (state->results_showing) {
+        results_screen_hide();
+        state->results_showing = false;
+    }
+    
     // Restart voyage
     voyage_start();
     satisfaction_tour_start(&state->game_ecs.tour);
     state->voyage_active = true;
-    state->results_showing = false;
     
     printf("Game state reset - voyage restarted\n");
 }
