@@ -298,7 +298,7 @@ void game_render_ui(const GameState* state) {
         // Title and controls hint (top-left with margin)
         int margin = 20;
         renderer_draw_text("MS Tour - Ship Control Prototype", margin, margin, 30, WHITE);
-        renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help | F8=Complete Voyage", margin, margin + 40, 20, LIGHTGRAY);
+        renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help | F8=Complete | F10=Compass Debug", margin, margin + 40, 20, LIGHTGRAY);
 
         // Voyage progress HUD (top-right) - only show during active voyage
         if (state->voyage_active) {
@@ -337,6 +337,112 @@ void game_render_ui(const GameState* state) {
             char time_text[64];
             snprintf(time_text, sizeof(time_text), "Time: %dm %02ds", minutes, seconds);
             renderer_draw_text(time_text, hud_x, hud_y + 80, 18, LIGHTGRAY);
+        }
+        
+        // POI Compass (top-left, below title) - only show when voyage active and POI remaining
+        if (state->voyage_active) {
+            int current_poi = voyage_get_current_poi_index();
+            const VoyageProgress* progress = voyage_get_progress();
+            
+            if (current_poi < progress->total_pois) {
+                // Get next POI position
+                float poi_x, poi_y;
+                poi_ecs_get_position(&state->game_ecs.poi_world, current_poi, &poi_x, &poi_y);
+                
+                // Get ship position and heading
+                float ship_x = state->player_ship.pos_x;
+                float ship_y = state->player_ship.pos_y;
+                float ship_heading = state->player_ship.heading;
+                
+                // Calculate direction to POI
+                float dx = poi_x - ship_x;
+                float dy = poi_y - ship_y;
+                float distance = sqrtf(dx * dx + dy * dy);
+                
+                // atan2f with Y-down gives: 0°=East, 90°=South, -90°=North (standard math)
+                // Ship heading uses: 0°=North, 90°=East, 180°=South (nautical)
+                // Convert by ADDING 90° (not subtracting)
+                float angle_to_poi_math = atan2f(dy, dx) * RAD2DEG;  // Math convention
+                float angle_to_poi_ship = angle_to_poi_math + 90.0f; // Convert to ship convention
+                
+                // Calculate relative angle (difference from ship heading)
+                float relative_angle = angle_to_poi_ship - ship_heading;
+                while (relative_angle > 180.0f) relative_angle -= 360.0f;
+                while (relative_angle < -180.0f) relative_angle += 360.0f;
+                
+                // Compass position (top-left, below controls)
+                int compass_x = margin + 50;
+                int compass_y = margin + 100;
+                int compass_radius = 40;
+                
+                // Debug output (toggle with F10, print every 60 frames = ~1 second at 60 FPS)
+                static bool compass_debug = false;
+                if (IsKeyPressed(KEY_F10)) {
+                    compass_debug = !compass_debug;
+                    printf("[COMPASS] Debug mode %s\n", compass_debug ? "enabled" : "disabled");
+                }
+                
+                static int debug_frame_counter = 0;
+                if (compass_debug && debug_frame_counter++ % 60 == 0) {
+                    printf("[COMPASS] Ship: (%.1f, %.1f) @ %.1f deg | POI %d: (%.1f, %.1f) | Dist: %.1f m\n",
+                           ship_x, ship_y, ship_heading, current_poi, poi_x, poi_y, distance);
+                    printf("[COMPASS] Angles: math=%.1f deg, ship=%.1f deg, relative=%.1f deg\n",
+                           angle_to_poi_math, angle_to_poi_ship, relative_angle);
+                    printf("[COMPASS] Arrow: screen_angle=%.1f deg, tip_offset=(%.1f, %.1f)\n",
+                           -90.0f + relative_angle, 
+                           cosf((-90.0f + relative_angle) * DEG2RAD) * (compass_radius - 5.0f),
+                           sinf((-90.0f + relative_angle) * DEG2RAD) * (compass_radius - 5.0f));
+                }
+                
+                // Draw compass background
+                DrawCircle(compass_x, compass_y, (float)(compass_radius + 5), (Color){20, 20, 40, 200});
+                DrawCircleLines(compass_x, compass_y, (float)(compass_radius + 5), (Color){100, 150, 200, 255});
+                
+                // Draw cardinal directions (N at ship's forward)
+                renderer_draw_text("N", compass_x - 5, compass_y - compass_radius - 20, 16, LIGHTGRAY);
+                
+                // Draw arrow pointing to POI
+                // relative_angle is in ship convention (0° = straight ahead, + = right, - = left)
+                // On compass: N is at top (-90° in screen coords with Y-down)
+                // Screen coords: 0° = right, 90° = down, -90° = up, 180° = left
+                float arrow_angle_screen = -90.0f + relative_angle; // N at top, add relative turn
+                float arrow_angle_rad = arrow_angle_screen * DEG2RAD;
+                float arrow_len = compass_radius - 5.0f;
+                int arrow_tip_x = compass_x + (int)(cosf(arrow_angle_rad) * arrow_len);
+                int arrow_tip_y = compass_y + (int)(sinf(arrow_angle_rad) * arrow_len);
+                
+                // Arrow color based on distance
+                Color arrow_color = distance < 100 ? GREEN : distance < 300 ? YELLOW : ORANGE;
+                DrawLineEx((Vector2){(float)compass_x, (float)compass_y}, 
+                          (Vector2){(float)arrow_tip_x, (float)arrow_tip_y}, 4, arrow_color);
+                
+                // Draw arrowhead
+                float head_angle1 = arrow_angle_rad + 150 * DEG2RAD;
+                float head_angle2 = arrow_angle_rad - 150 * DEG2RAD;
+                int head_len = 10;
+                int head1_x = arrow_tip_x + (int)(cosf(head_angle1) * head_len);
+                int head1_y = arrow_tip_y + (int)(sinf(head_angle1) * head_len);
+                int head2_x = arrow_tip_x + (int)(cosf(head_angle2) * head_len);
+                int head2_y = arrow_tip_y + (int)(sinf(head_angle2) * head_len);
+                
+                DrawTriangle((Vector2){(float)arrow_tip_x, (float)arrow_tip_y},
+                           (Vector2){(float)head1_x, (float)head1_y},
+                           (Vector2){(float)head2_x, (float)head2_y}, arrow_color);
+                
+                // Draw distance text to the right of compass
+                char dist_text[32];
+                int dist_text_x = compass_x + compass_radius + 25;
+                int dist_text_y = compass_y - 20;
+                
+                renderer_draw_text("Next POI:", dist_text_x, dist_text_y, 16, LIGHTGRAY);
+                
+                if (distance >= 1000.0f) {
+                    snprintf(dist_text, sizeof(dist_text), "%.1f km", distance / 1000.0f);
+                } else {
+                    snprintf(dist_text, sizeof(dist_text), "%.0f m", distance);
+                }
+                renderer_draw_text(dist_text, dist_text_x, dist_text_y + 20, 20, arrow_color);
+            }
         }
 
         // Ship UI (gauges and indicators) - uses engine_ui internally
