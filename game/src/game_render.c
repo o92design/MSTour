@@ -5,6 +5,7 @@
 #include "game_poi_ecs.h"
 #include "game_fog_of_war.h"
 #include "game_satisfaction.h"
+#include "results_screen.h"
 #include "engine_core.h"
 #include "engine_renderer.h"
 #include "engine_camera.h"
@@ -330,4 +331,9 @@ void game_render(const GameState* state) {
     // Render UI (screen space, not affected by camera)
     game_render_ui(state);
     game_render_debug(state);
+    
+    // Render results screen on top of everything if showing
+    if (state->results_showing) {
+        results_screen_render();
+    }
 }

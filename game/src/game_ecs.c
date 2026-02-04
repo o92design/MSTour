@@ -1,5 +1,6 @@
 #include "game_ecs.h"
 #include "game_poi_loader.h"
+#include "voyage_manager.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -20,6 +21,16 @@ static void on_poi_visit(int poi_index, Entity visitor, void* user_data) {
         if (bonus > 0) {
             printf("  Satisfaction bonus: +%d\n", bonus);
         }
+        
+        // Update voyage manager with current satisfaction
+        int current_satisfaction = satisfaction_calculate_score(&state->tour);
+        voyage_record_poi_satisfaction((float)current_satisfaction);
+        
+        // Advance to next POI in voyage
+        voyage_advance_to_next_poi();
+        
+        printf("  Voyage progress: POI %d/%d complete\n", 
+               voyage_get_current_poi_index() + 1, voyage_get_progress()->total_pois);
     }
 }
 

@@ -26,4 +26,7 @@ void game_update_camera(GameState* state, float delta_time);
 // Handle debug key presses
 void game_update_debug(GameState* state);
 
+// Update voyage progression (check completion, transitions)
+void game_update_voyage(GameState* state, float delta_time);
+
 #endif // GAME_UPDATE_H

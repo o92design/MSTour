@@ -1,5 +1,7 @@
 #include "game_state.h"
 #include "game_poi_loader.h"
+#include "voyage_manager.h"
+#include "results_screen.h"
 #include "config.h"
 #include "game_constants.h"
 #include "engine_core.h"
@@ -93,9 +95,20 @@ bool game_state_init(GameState* state, const ConfigFile* config) {
         printf("Warning: Using default POIs\n");
     }
     
-    // Start a demo tour for satisfaction tracking
+    // Initialize voyage manager with POI count
+    int poi_count = state->game_ecs.poi_world.poi_count;
+    voyage_init(poi_count);
+    
+    // Initialize results screen
+    results_screen_init();
+    
+    // Start voyage and tour satisfaction tracking
+    voyage_start();
     satisfaction_tour_start(&state->game_ecs.tour);
-    printf("Demo tour started - visit POIs to earn satisfaction!\n");
+    state->voyage_active = true;
+    state->results_showing = false;
+    
+    printf("Voyage started with %d POIs - visit them all to complete the tour!\n", poi_count);
     
     state->initialized = true;
     state->paused = false;
@@ -107,6 +120,8 @@ bool game_state_init(GameState* state, const ConfigFile* config) {
 void game_state_shutdown(GameState* state) {
     if (!state || !state->initialized) return;
     
+    results_screen_shutdown();
+    voyage_shutdown();
     game_ecs_shutdown(&state->game_ecs);
     audio_shutdown(&state->audio);
     
@@ -147,7 +162,13 @@ void game_state_reset(GameState* state) {
     // Reset camera
     camera_set_position(&state->camera, center_x, center_y);
     
-    printf("Game state reset\n");
+    // Restart voyage
+    voyage_start();
+    satisfaction_tour_start(&state->game_ecs.tour);
+    state->voyage_active = true;
+    state->results_showing = false;
+    
+    printf("Game state reset - voyage restarted\n");
 }
 
 GameState* game_get_state(void) {

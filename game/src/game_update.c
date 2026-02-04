@@ -1,5 +1,7 @@
 #include "game_update.h"
 #include "game_ecs.h"
+#include "voyage_manager.h"
+#include "results_screen.h"
 #include "input_actions.h"
 #include "config.h"
 #include "engine_math.h"
@@ -150,9 +152,61 @@ void game_update(GameState* state, float delta_time) {
     if (!state || !state->initialized) return;
     if (state->paused) return;
     
+    // Handle results screen if showing
+    if (state->results_showing) {
+        bool retry_clicked = false;
+        bool menu_clicked = false;
+        bool action_taken = results_screen_handle_input(&retry_clicked, &menu_clicked);
+        
+        if (action_taken) {
+            if (retry_clicked) {
+                // Retry - restart the voyage
+                printf("Retrying voyage...\n");
+                game_state_reset(state);
+            } else if (menu_clicked) {
+                // Menu - for now just hide results
+                printf("Returning to menu...\n");
+                state->results_showing = false;
+                results_screen_hide();
+                // Could transition to main menu here in the future
+            }
+        }
+        return; // Don't update game while results showing
+    }
+    
     game_update_input(state);
     game_update_debug(state);
     game_update_ship(state, delta_time);
+    game_update_voyage(state, delta_time);
     game_update_audio(state);
     game_update_camera(state, delta_time);
+}
+
+void game_update_voyage(GameState* state, float delta_time) {
+    if (!state || !state->voyage_active) return;
+    
+    // Update voyage duration
+    voyage_update(delta_time);
+    
+    // Check if voyage is complete
+    if (voyage_is_complete()) {
+        printf("Voyage complete! Showing results...\n");
+        
+        // End satisfaction tour
+        satisfaction_tour_end(&state->game_ecs.tour);
+        
+        // Get voyage data
+        const VoyageProgress* progress = voyage_get_progress();
+        
+        // Show results screen with voyage data
+        results_screen_show(
+            "Vinga Lighthouse Tour",  // Route name from config
+            progress->poi_satisfaction_scores,
+            progress->total_pois,
+            progress->voyage_duration
+        );
+        
+        state->voyage_active = false;
+        state->results_showing = true;
+    }
 }

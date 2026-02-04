@@ -9,6 +9,8 @@
 #include "engine_config.h"
 #include "engine_ecs.h"
 #include "game_ecs.h"
+#include "voyage_manager.h"
+#include "results_screen.h"
 #include <stdbool.h>
 
 // =============================================================================
@@ -50,6 +52,11 @@ typedef struct GameState {
     
     // Config
     const char* config_path;
+    
+    // Voyage & Results
+    bool voyage_active;
+    bool results_showing;
+    ResultsScreenState results;
     
     // State flags
     bool initialized;
