@@ -162,13 +162,7 @@ void game_state_reset(GameState* state) {
     // Reset camera
     camera_set_position(&state->camera, center_x, center_y);
     
-    // Hide results screen if showing
-    if (state->results_showing) {
-        results_screen_hide();
-        state->results_showing = false;
-    }
-    
-    // Restart voyage
+    // Restart voyage (results screen should already be hidden by caller)
     voyage_start();
     satisfaction_tour_start(&state->game_ecs.tour);
     state->voyage_active = true;

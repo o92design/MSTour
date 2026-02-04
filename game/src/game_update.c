@@ -154,17 +154,17 @@ void game_update_debug(GameState* state) {
         }
     }
     if (IsKeyPressed(KEY_F9)) {
-        // Debug: Toggle results screen visibility (only if voyage has run)
+        // Debug: Toggle results screen with test data (for UI testing)
         if (state->results_showing) {
             printf("Debug: Hiding results screen\n");
             state->results_showing = false;
             results_screen_hide();
-        } else if (!state->voyage_active && voyage_get_progress()->voyage_duration > 0) {
-            // Only show if voyage has completed at least once
-            printf("Debug: Re-showing results screen\n");
-            state->results_showing = true;
         } else {
-            printf("Debug: Complete a voyage first (press F8) before toggling results\n");
+            printf("Debug: Showing test results screen\n");
+            // Create test data for results screen UI testing
+            float test_scores[] = {75.0f, 88.0f, 95.0f};
+            results_screen_show("Debug Test Route", test_scores, 3, 245.5f);
+            state->results_showing = true;
         }
     }
 }
@@ -181,15 +181,17 @@ void game_update(GameState* state, float delta_time) {
         
         if (action_taken) {
             if (retry_clicked) {
-                // Retry - restart the voyage
+                // Retry - hide results and restart
                 printf("Retrying voyage...\n");
+                results_screen_hide();
+                state->results_showing = false;
                 game_state_reset(state);
             } else if (menu_clicked) {
-                // Menu - for now just hide results
-                printf("Returning to menu...\n");
-                state->results_showing = false;
+                // Return to game - just hide results and resume
+                printf("Returning to game...\n");
                 results_screen_hide();
-                // Could transition to main menu here in the future
+                state->results_showing = false;
+                // Voyage stays complete, can restart manually with F5
             }
         }
         return; // Don't update game while results showing

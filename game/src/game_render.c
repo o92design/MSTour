@@ -5,6 +5,7 @@
 #include "game_poi_ecs.h"
 #include "game_fog_of_war.h"
 #include "game_satisfaction.h"
+#include "voyage_manager.h"
 #include "results_screen.h"
 #include "engine_core.h"
 #include "engine_renderer.h"
@@ -291,17 +292,56 @@ void game_render_ships(const GameState* state) {
 
 void game_render_ui(const GameState* state) {
     if (!state) return;
-    
+
     // Only render UI if help and debug panel are not shown
     if (!state->debug.show_help && !state->debug.show_debug_panel) {
         // Title and controls hint (top-left with margin)
         int margin = 20;
         renderer_draw_text("MS Tour - Ship Control Prototype", margin, margin, 30, WHITE);
         renderer_draw_text("Controls: W/S=Telegraph Orders | A/D=Turn | F3=Help | F8=Complete Voyage", margin, margin + 40, 20, LIGHTGRAY);
-        
+
+        // Voyage progress HUD (top-right) - only show during active voyage
+        if (state->voyage_active) {
+            const VoyageProgress* progress = voyage_get_progress();
+            int screen_width = engine_get_window_width();
+            int hud_x = screen_width - 280;
+            int hud_y = margin;
+            
+            // Background panel
+            Color panel_bg = {20, 20, 40, 200};
+            DrawRectangle(hud_x - 10, hud_y - 10, 270, 120, panel_bg);
+            DrawRectangleLinesEx((Rectangle){hud_x - 10, hud_y - 10, 270, 120}, 2, (Color){100, 150, 200, 255});
+            
+            // Voyage title
+            renderer_draw_text("VOYAGE PROGRESS", hud_x, hud_y, 20, (Color){150, 200, 255, 255});
+            
+            // POI counter
+            char poi_text[64];
+            snprintf(poi_text, sizeof(poi_text), "POIs: %d / %d", 
+                     progress->current_poi_index + 1, progress->total_pois);
+            renderer_draw_text(poi_text, hud_x, hud_y + 30, 18, WHITE);
+            
+            // Current satisfaction (if POI in progress)
+            if (progress->current_poi_index >= 0 && progress->current_poi_index < progress->total_pois) {
+                float current_sat = progress->poi_satisfaction_scores[progress->current_poi_index];
+                char sat_text[64];
+                snprintf(sat_text, sizeof(sat_text), "Satisfaction: %.0f%%", current_sat);
+                Color sat_color = current_sat >= 80 ? GREEN : 
+                                 current_sat >= 60 ? YELLOW : ORANGE;
+                renderer_draw_text(sat_text, hud_x, hud_y + 55, 18, sat_color);
+            }
+            
+            // Duration
+            int minutes = (int)(progress->voyage_duration / 60.0f);
+            int seconds = (int)(progress->voyage_duration) % 60;
+            char time_text[64];
+            snprintf(time_text, sizeof(time_text), "Time: %dm %02ds", minutes, seconds);
+            renderer_draw_text(time_text, hud_x, hud_y + 80, 18, LIGHTGRAY);
+        }
+
         // Ship UI (gauges and indicators) - uses engine_ui internally
         ship_ui_render(&state->player_ship, &state->telegraph);
-        
+
         // Frame info (bottom-left)
         char debug_text[256];
         snprintf(debug_text, sizeof(debug_text), "FPS: %.1f | Frame: %llu", 
