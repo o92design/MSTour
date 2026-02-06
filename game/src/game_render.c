@@ -486,9 +486,6 @@ void game_render_ui(const GameState* state) {
 void game_render_debug(const GameState* state) {
     if (!state) return;
     
-    // Debug visualization (velocity vectors, turn radius, etc.)
-    debug_tools_draw_visualization(&state->debug, &state->player_ship, &state->physics_config);
-    
     // Debug panel (ship state values)
     debug_tools_draw_panel(&state->debug, &state->player_ship, &state->physics_config);
     
@@ -507,6 +504,9 @@ void game_render(const GameState* state) {
     game_render_pois(state);
     game_render_fog_overlay(state);  // Fog on top of POIs, reveals around ship
     game_render_ships(state);        // Ship on top of fog
+    
+    // Debug visualization (velocity vectors, turn radius, etc.)
+    debug_tools_draw_visualization(&state->debug, &state->player_ship, &state->physics_config);
     
     // End camera mode
     camera_end();
