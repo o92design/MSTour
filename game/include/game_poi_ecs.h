@@ -2,6 +2,7 @@
 #define GAME_POI_ECS_H
 
 #include "engine_ecs.h"
+#include "game_textures.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -76,6 +77,9 @@ typedef struct POIComponents {
     // Interaction
     float radius[MAX_POIS];         // Visit detection radius
     int satisfaction_bonus[MAX_POIS];
+    
+    // Rendering (pre-computed at load time)
+    TextureID sprite_ids[MAX_POIS]; // Sprite ID for rendering (TEXTURE_NONE = geometric fallback)
     
     // State
     bool visited[MAX_POIS];         // Has player visited this POI?
@@ -162,6 +166,9 @@ bool poi_ecs_is_visited(const POIEcsWorld* poi_world, int poi_index);
 
 // Check if POI is discovered (visible through fog)
 bool poi_ecs_is_discovered(const POIEcsWorld* poi_world, int poi_index);
+
+// Get POI sprite ID (pre-computed at load time)
+TextureID poi_ecs_get_sprite_id(const POIEcsWorld* poi_world, int poi_index);
 
 // =============================================================================
 // POI State Modification

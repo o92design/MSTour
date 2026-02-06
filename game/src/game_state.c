@@ -1,5 +1,6 @@
 #include "game_state.h"
 #include "game_poi_loader.h"
+#include "game_textures.h"
 #include "voyage_manager.h"
 #include "results_screen.h"
 #include "config.h"
@@ -90,6 +91,11 @@ bool game_state_init(GameState* state, const ConfigFile* config) {
     // Initialize debug tools
     debug_tools_init(&state->debug);
     
+    // Load game textures (sprites)
+    if (!game_textures_init()) {
+        printf("Warning: Failed to load game textures, using fallback rendering\n");
+    }
+    
     // Load POIs
     if (!game_ecs_load_pois(&state->game_ecs, NULL)) {
         printf("Warning: Using default POIs\n");
@@ -124,6 +130,7 @@ void game_state_shutdown(GameState* state) {
     voyage_shutdown();
     game_ecs_shutdown(&state->game_ecs);
     audio_shutdown(&state->audio);
+    game_textures_cleanup();
     
     state->initialized = false;
     printf("Game state shutdown\n");

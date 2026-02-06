@@ -17,6 +17,7 @@ void poi_ecs_init(POIEcsWorld* poi_world) {
     for (int i = 0; i < MAX_POIS; i++) {
         poi_world->pois.discovered[i] = false;
         poi_world->pois.visited[i] = false;
+        poi_world->pois.sprite_ids[i] = TEXTURE_NONE;
     }
 }
 
@@ -84,6 +85,14 @@ int poi_ecs_create(POIEcsWorld* poi_world, const POICreateParams* params) {
     poi_world->pois.discovered[idx] = true;  // All visible for prototype
     poi_world->pois.visit_count[idx] = 0;
     
+    // Pre-compute sprite ID at load time (optimization: avoid strstr in render loop)
+    // Check if name contains "Lighthouse" or "lighthouse"
+    if (params->name && (strstr(params->name, "Lighthouse") != NULL || strstr(params->name, "lighthouse") != NULL)) {
+        poi_world->pois.sprite_ids[idx] = TEXTURE_LIGHTHOUSE;
+    } else {
+        poi_world->pois.sprite_ids[idx] = TEXTURE_NONE;
+    }
+    
     poi_world->poi_count++;
     return idx;
 }
@@ -107,6 +116,7 @@ void poi_ecs_destroy(POIEcsWorld* poi_world, int poi_index) {
         poi_world->pois.visited[poi_index] = poi_world->pois.visited[last];
         poi_world->pois.discovered[poi_index] = poi_world->pois.discovered[last];
         poi_world->pois.visit_count[poi_index] = poi_world->pois.visit_count[last];
+        poi_world->pois.sprite_ids[poi_index] = poi_world->pois.sprite_ids[last];
     }
     
     poi_world->poi_count--;
@@ -169,6 +179,11 @@ bool poi_ecs_is_visited(const POIEcsWorld* poi_world, int poi_index) {
 bool poi_ecs_is_discovered(const POIEcsWorld* poi_world, int poi_index) {
     if (!poi_ecs_is_valid(poi_world, poi_index)) return false;
     return poi_world->pois.discovered[poi_index];
+}
+
+TextureID poi_ecs_get_sprite_id(const POIEcsWorld* poi_world, int poi_index) {
+    if (!poi_ecs_is_valid(poi_world, poi_index)) return TEXTURE_NONE;
+    return poi_world->pois.sprite_ids[poi_index];
 }
 
 // =============================================================================

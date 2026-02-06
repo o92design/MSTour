@@ -5,6 +5,7 @@
 #include "game_poi_ecs.h"
 #include "game_fog_of_war.h"
 #include "game_satisfaction.h"
+#include "game_textures.h"
 #include "voyage_manager.h"
 #include "results_screen.h"
 #include "engine_core.h"
@@ -13,6 +14,7 @@
 #include "engine_ui.h"
 #include <raylib.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 
 // =============================================================================
@@ -55,8 +57,8 @@ static Color get_poi_color(POIType type, POITier tier, bool visited) {
     return base;
 }
 
-static void draw_poi_icon(float x, float y, POIType type, POITier tier, 
-                          bool visited, float fog_alpha) {
+static void draw_poi_icon(float x, float y, POIType type, POITier tier,
+                          bool visited, float fog_alpha, TextureID sprite_id) {
     float size = (tier == POI_TIER_SPECIAL) ? 16.0f : 12.0f;
     Color color = get_poi_color(type, tier, visited);
     
@@ -66,7 +68,30 @@ static void draw_poi_icon(float x, float y, POIType type, POITier tier,
     float alpha_mult = FOG_POI_MIN_ALPHA + (1.0f - FOG_POI_MIN_ALPHA) * (1.0f - fog_alpha);
     color.a = (unsigned char)(color.a * alpha_mult);
     
-    // Draw based on type
+    // Use pre-computed sprite_id for sprite rendering (optimization: no strstr in render loop)
+    if (sprite_id != TEXTURE_NONE) {
+        const TextureMetadata* meta = game_textures_get_metadata(sprite_id);
+        
+        if (meta && meta->texture.id != 0) {
+            Rectangle dest = {x, y, meta->scaled_width, meta->scaled_height};
+            
+            // Apply fog alpha to sprite
+            Color tint = WHITE;
+            tint.a = (unsigned char)(255 * alpha_mult);
+            
+            DrawTexturePro(meta->texture, meta->source, dest, meta->origin, 0.0f, tint);
+            
+            // Draw check mark if visited
+            if (visited) {
+                Color check_color = GREEN;
+                check_color.a = (unsigned char)(255 * alpha_mult);
+                DrawCircle((int)(x + meta->scaled_width * 0.3f), (int)(y - meta->scaled_height * 0.4f), 8, check_color);
+            }
+            return;
+        }
+    }
+    
+    // Fallback to geometric rendering
     switch (type) {
         case POI_TYPE_NATURE:
             // Tree-like triangle
@@ -171,8 +196,9 @@ void game_render_pois(const GameState* state) {
             }
         }
         
-        // Draw POI icon
-        draw_poi_icon(x, y, type, tier, visited, fog_alpha);
+        // Draw POI icon using pre-computed sprite ID
+        TextureID sprite_id = poi_ecs_get_sprite_id(poi_world, (int)i);
+        draw_poi_icon(x, y, type, tier, visited, fog_alpha, sprite_id);
         
         // Draw name label (only when fog is mostly cleared)
         if (fog_alpha < 0.5f) {

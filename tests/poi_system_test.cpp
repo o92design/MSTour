@@ -400,3 +400,105 @@ TEST_F(POILoaderTest, LoadDefaults) {
     // Should have at least a few default POIs
     EXPECT_GE(poi_ecs_get_count(&poi_world), 3u);
 }
+
+TEST_F(POILoaderTest, LighthouseSpriteIDFromJSON) {
+    // Test that lighthouse POIs loaded from JSON get correct sprite ID
+    const char* json = R"({
+        "version": "1.0",
+        "pois": [
+            {
+                "name": "Vinga Lighthouse",
+                "type": "historical",
+                "tier": "special",
+                "position": { "x": 100.0, "y": 200.0 },
+                "radius": 50.0,
+                "satisfaction_bonus": 15,
+                "description": "A coastal lighthouse"
+            },
+            {
+                "name": "Old Castle",
+                "type": "historical",
+                "tier": "special",
+                "position": { "x": 200.0, "y": 300.0 },
+                "radius": 60.0,
+                "satisfaction_bonus": 18,
+                "description": "Historic castle"
+            }
+        ]
+    })";
+    
+    POILoadResult result = poi_load_from_string(&poi_world, json);
+    
+    EXPECT_EQ(result, POI_LOAD_SUCCESS);
+    EXPECT_EQ(poi_ecs_get_count(&poi_world), 2u);
+    
+    // Lighthouse should have TEXTURE_LIGHTHOUSE
+    EXPECT_STREQ(poi_ecs_get_name(&poi_world, 0), "Vinga Lighthouse");
+    EXPECT_EQ(poi_ecs_get_sprite_id(&poi_world, 0), TEXTURE_LIGHTHOUSE);
+    
+    // Non-lighthouse should have TEXTURE_NONE
+    EXPECT_STREQ(poi_ecs_get_name(&poi_world, 1), "Old Castle");
+    EXPECT_EQ(poi_ecs_get_sprite_id(&poi_world, 1), TEXTURE_NONE);
+}
+
+// =============================================================================
+// Sprite ID Optimization Tests
+// =============================================================================
+
+TEST_F(POIEcsTest, LighthouseSpriteIDPrecomputed) {
+    // Test that lighthouses get TEXTURE_LIGHTHOUSE sprite ID at load time
+    POICreateParams lighthouse_params = make_poi_params(
+        "Test Lighthouse", POI_TYPE_HISTORICAL, POI_TIER_SPECIAL,
+        100.0f, 200.0f, 50.0f, 15
+    );
+    
+    int idx = poi_ecs_create(&poi_world, &lighthouse_params);
+    
+    EXPECT_GE(idx, 0);
+    
+    // Verify sprite ID is set to TEXTURE_LIGHTHOUSE
+    TextureID sprite_id = poi_ecs_get_sprite_id(&poi_world, idx);
+    EXPECT_EQ(sprite_id, TEXTURE_LIGHTHOUSE);
+}
+
+TEST_F(POIEcsTest, LighthouseCaseInsensitive) {
+    // Test lowercase "lighthouse"
+    POICreateParams lighthouse_params = make_poi_params(
+        "Old lighthouse", POI_TYPE_HISTORICAL, POI_TIER_GENERAL,
+        50.0f, 50.0f, 30.0f, 8
+    );
+    
+    int idx = poi_ecs_create(&poi_world, &lighthouse_params);
+    
+    TextureID sprite_id = poi_ecs_get_sprite_id(&poi_world, idx);
+    EXPECT_EQ(sprite_id, TEXTURE_LIGHTHOUSE);
+}
+
+TEST_F(POIEcsTest, NonLighthouseUsesGeometricFallback) {
+    // Test that non-lighthouse POIs use TEXTURE_NONE (geometric fallback)
+    POICreateParams nature_params = make_poi_params(
+        "Mountain Peak", POI_TYPE_NATURE, POI_TIER_GENERAL,
+        150.0f, 150.0f, 40.0f, 5
+    );
+    
+    int idx = poi_ecs_create(&poi_world, &nature_params);
+    
+    TextureID sprite_id = poi_ecs_get_sprite_id(&poi_world, idx);
+    EXPECT_EQ(sprite_id, TEXTURE_NONE);
+}
+
+TEST_F(POIEcsTest, MultiplePOIsCorrectSpriteIDs) {
+    // Create variety of POIs and verify correct sprite IDs
+    POICreateParams lighthouse = make_poi_params("Coastal Lighthouse", POI_TYPE_HISTORICAL, POI_TIER_SPECIAL, 0.0f, 0.0f);
+    POICreateParams castle = make_poi_params("Ancient Castle", POI_TYPE_HISTORICAL, POI_TIER_SPECIAL, 100.0f, 0.0f);
+    POICreateParams another_lighthouse = make_poi_params("Harbor Lighthouse", POI_TYPE_HISTORICAL, POI_TIER_GENERAL, 200.0f, 0.0f);
+    
+    int lighthouse_idx = poi_ecs_create(&poi_world, &lighthouse);
+    int castle_idx = poi_ecs_create(&poi_world, &castle);
+    int lighthouse2_idx = poi_ecs_create(&poi_world, &another_lighthouse);
+    
+    // Verify sprite IDs
+    EXPECT_EQ(poi_ecs_get_sprite_id(&poi_world, lighthouse_idx), TEXTURE_LIGHTHOUSE);
+    EXPECT_EQ(poi_ecs_get_sprite_id(&poi_world, castle_idx), TEXTURE_NONE);
+    EXPECT_EQ(poi_ecs_get_sprite_id(&poi_world, lighthouse2_idx), TEXTURE_LIGHTHOUSE);
+}

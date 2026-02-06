@@ -1,5 +1,6 @@
 #include "ship_render.h"
 #include "game_constants.h"
+#include "game_textures.h"
 #include "engine_math.h"
 #include <raylib.h>
 #include <raymath.h>
@@ -43,6 +44,16 @@ void ship_render_draw_at(float x, float y, float heading, const ShipVisualStyle*
     
     Vector2 ship_pos = {x, y};
     
+    // Try to use sprite rendering with pre-computed metadata
+    const TextureMetadata* meta = game_textures_get_metadata(TEXTURE_SHIP_FORWARD);
+    if (meta && meta->texture.id != 0) {
+        // Use pre-computed values - no per-frame calculations
+        Rectangle dest = {x, y, meta->scaled_width, meta->scaled_height};
+        DrawTexturePro(meta->texture, meta->source, dest, meta->origin, heading, WHITE);
+        return;
+    }
+    
+    // Fallback to geometric rendering if sprites not available
     // Calculate ship vertices for triangle (pointing in heading direction)
     // Ship heading: 0° = north (up), rotating clockwise
     
@@ -75,6 +86,20 @@ void ship_render_draw_at(float x, float y, float heading, const ShipVisualStyle*
 
 void ship_render_draw(const ShipState* ship, const ShipVisualStyle* style) {
     if (!ship || !style) return;
+    
+    // Choose texture based on velocity direction
+    bool moving_forward = ship->speed >= 0.0f;
+    TextureID tex_id = moving_forward ? TEXTURE_SHIP_FORWARD : TEXTURE_SHIP_BACKWARD;
+    const TextureMetadata* meta = game_textures_get_metadata(tex_id);
+    
+    if (meta && meta->texture.id != 0) {
+        // Use pre-computed metadata - no per-frame calculations
+        Rectangle dest = {ship->pos_x, ship->pos_y, meta->scaled_width, meta->scaled_height};
+        DrawTexturePro(meta->texture, meta->source, dest, meta->origin, ship->heading, WHITE);
+        return;
+    }
+    
+    // Fallback to geometric rendering
     ship_render_draw_at(ship->pos_x, ship->pos_y, ship->heading, style);
 }
 
