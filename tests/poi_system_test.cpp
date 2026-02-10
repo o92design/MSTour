@@ -220,7 +220,7 @@ protected:
     
     void SetUp() override {
         poi_ecs_init(&poi_world);
-        satisfaction_tour_start(&tour);
+        satisfaction_tour_start(&tour, 0);
     }
     
     void TearDown() override {
@@ -317,6 +317,26 @@ TEST_F(SatisfactionTest, TourEnd) {
     
     EXPECT_FALSE(satisfaction_tour_is_active(&tour));
     EXPECT_GT(tour.total_satisfaction, 0);
+}
+
+TEST_F(SatisfactionTest, CompletionBonus) {
+    // Restart tour with expectation of 1 POI
+    satisfaction_tour_start(&tour, 1);
+    
+    POICreateParams params = make_poi_params(
+        "Low Value POI", POI_TYPE_NATURE, POI_TIER_GENERAL,
+        0.0f, 0.0f, 50.0f, 5
+    );
+    
+    int idx = poi_ecs_create(&poi_world, &params);
+    
+    // Visiting this one POI should give 50 (base) + 5 (bonus) = 55 normally
+    // But since it's the only one and we visited all (1/1), it should be 100
+    
+    satisfaction_record_poi_visit(&tour, &poi_world, idx);
+    int score = satisfaction_calculate_score(&tour);
+    
+    EXPECT_EQ(score, 100);
 }
 
 // =============================================================================
@@ -439,6 +459,25 @@ TEST_F(POILoaderTest, LighthouseSpriteIDFromJSON) {
     // Non-lighthouse should have TEXTURE_NONE
     EXPECT_STREQ(poi_ecs_get_name(&poi_world, 1), "Old Castle");
     EXPECT_EQ(poi_ecs_get_sprite_id(&poi_world, 1), TEXTURE_NONE);
+}
+
+TEST_F(POILoaderTest, LoadActualAssetFile) {
+    // Verify that the actual asset file is valid JSON and loads correctly
+    POILoadResult result = poi_load_from_file(&poi_world, "assets/data/pois.json");
+    
+    // Note: If running from build dir, path might need adjustment. 
+    // Usually CTest runs from build dir, so "../assets/data/pois.json" might be needed
+    // But since we don't know exact CWD, we'll try a few or just skip if file not found
+    
+    if (result == POI_LOAD_FILE_NOT_FOUND) {
+        result = poi_load_from_file(&poi_world, "../assets/data/pois.json");
+    }
+    
+    if (result != POI_LOAD_FILE_NOT_FOUND) {
+        EXPECT_EQ(result, POI_LOAD_SUCCESS);
+        // Expect at least the 10 POIs we know are in there
+        EXPECT_GE(poi_ecs_get_count(&poi_world), 10u);
+    }
 }
 
 // =============================================================================

@@ -57,6 +57,11 @@ typedef enum POITier {
 // Default visit radius (world units)
 #define POI_DEFAULT_RADIUS 50.0f
 
+// Viewing Constants
+#define POI_VIEW_MAX_SPEED 60.0f
+#define POI_VIEW_MAX_DIST_MULT 4.0f
+#define POI_VIEW_ALIGNMENT_TOLERANCE 0.7f
+
 // =============================================================================
 // POI Components (SoA Layout)
 // =============================================================================
@@ -169,6 +174,28 @@ bool poi_ecs_is_discovered(const POIEcsWorld* poi_world, int poi_index);
 
 // Get POI sprite ID (pre-computed at load time)
 TextureID poi_ecs_get_sprite_id(const POIEcsWorld* poi_world, int poi_index);
+
+// =============================================================================
+// POI Viewing Status (Advanced Tourism)
+// =============================================================================
+
+typedef struct POIViewStatus {
+    bool in_range;           // Within view range (larger than trigger radius)
+    bool speed_ok;           // Moving slow enough to view
+    bool angle_ok;           // Ship orientation allows passengers to see
+    bool is_viewable;        // All conditions met for a "good view"
+    
+    float distance;          // Current distance to POI center
+    float current_speed;     // Current ship speed
+    float alignment;         // 0.0 = broadside (good), 1.0 = head-on (bad)
+    float quality_score;     // 0.0 to 1.0 overall score
+} POIViewStatus;
+
+// Get view status for a specific ship and POI
+// Returns detailed status about how well the ship is viewing the POI
+POIViewStatus poi_ecs_get_view_status(const POIEcsWorld* poi_world, int poi_index, 
+                                     float ship_x, float ship_y,
+                                     float ship_rot, float ship_speed);
 
 // =============================================================================
 // POI State Modification

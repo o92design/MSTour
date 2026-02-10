@@ -200,6 +200,73 @@ void game_render_pois(const GameState* state) {
         TextureID sprite_id = poi_ecs_get_sprite_id(poi_world, (int)i);
         draw_poi_icon(x, y, type, tier, visited, fog_alpha, sprite_id);
         
+        // Draw Tourist View Cone/Indicator
+        // Allow visited POIs to show guide (so you can see what you did, or if you re-approach)
+        if (fog_alpha < 0.5f && state->voyage_active) {
+            float ship_x = state->player_ship.pos_x;
+            float ship_y = state->player_ship.pos_y;
+            float ship_rot = state->player_ship.heading;
+            float ship_speed = state->player_ship.speed;
+            
+            // Check view status
+            POIViewStatus status = poi_ecs_get_view_status(poi_world, (int)i, ship_x, ship_y, ship_rot, ship_speed);
+            
+            // Draw view range circle (dashed/thin) - Always draw range ring to see target
+            float view_radius = poi_ecs_get_radius(poi_world, (int)i) * POI_VIEW_MAX_DIST_MULT;
+            Color range_color = {200, 200, 255, 30};
+            DrawCircleLines((int)x, (int)y, view_radius, range_color);
+
+            // Determine Feedback Color and Text
+            Color cone_color;
+            const char* feedback = "";
+            
+            if (visited) {
+                cone_color = (Color){50, 255, 50, 60}; // Faint Green
+                feedback = "VISITED";
+            } else if (!status.in_range) {
+                // Out of range: Guide alignment, ignore speed
+                if (!status.angle_ok) {
+                    cone_color = (Color){255, 50, 50, 40};  // Faint Red (Bad Alignment)
+                    feedback = "ALIGN BROADSIDE";
+                } else {
+                    cone_color = (Color){200, 200, 200, 40}; // Faint White (Good Approach)
+                    feedback = "APPROACHING";
+                }
+            } else {
+                // In range: Full feedback including speed
+                if (!status.speed_ok) {
+                    cone_color = (Color){255, 200, 0, 100}; // Yellow (Slow Down)
+                    feedback = "TOO FAST!";
+                } else if (!status.angle_ok) {
+                    cone_color = (Color){255, 50, 50, 80};  // Red (Turn Broadside)
+                    feedback = "TURN BROADSIDE";
+                } else {
+                    cone_color = (Color){50, 255, 50, 120}; // Green (Good View)
+                    feedback = "VIEWING...";
+                }
+            }
+            
+            // Draw connection line
+            DrawLineEx((Vector2){ship_x, ship_y}, (Vector2){x, y}, 2.0f, cone_color);
+            
+            // Draw feedback text
+            // Only show text if relatively close (e.g., 2x view distance) or if there's an issue
+            float dist_ratio = status.distance / view_radius;
+            if (dist_ratio < 2.0f || status.in_range) {
+                int text_w = MeasureText(feedback, 10);
+                DrawText(feedback, (int)(ship_x - text_w/2), (int)(ship_y - 60), 10, cone_color);
+            }
+            
+            // Draw quality bar if viewing AND not visited (no need to show bar if done)
+            if (status.is_viewable && !visited) {
+                float bar_w = 40.0f;
+                float bar_h = 6.0f;
+                float fill = status.quality_score;
+                DrawRectangle((int)(ship_x - bar_w/2), (int)(ship_y - 45), (int)bar_w, (int)bar_h, DARKGRAY);
+                DrawRectangle((int)(ship_x - bar_w/2), (int)(ship_y - 45), (int)(bar_w * fill), (int)bar_h, GREEN);
+            }
+        }
+        
         // Draw name label (only when fog is mostly cleared)
         if (fog_alpha < 0.5f) {
             const char* name = poi_ecs_get_name(poi_world, (int)i);

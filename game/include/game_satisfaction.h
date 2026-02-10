@@ -18,7 +18,7 @@
 // Constants
 // =============================================================================
 
-#define MAX_TOUR_POIS 32            // Maximum POIs in a single tour
+#define MAX_TOUR_POIS 64            // Maximum POIs in a single tour
 #define BASE_SATISFACTION 50        // Starting satisfaction for a tour
 #define VARIETY_BONUS_THRESHOLD 3   // Number of different types for variety bonus
 
@@ -63,6 +63,9 @@ typedef struct TourSatisfaction {
     uint32_t general_count;
     uint32_t special_count;
     
+    // Target tracking
+    uint32_t total_pois_target;     // Total POIs available/planned (for completion bonus)
+    
     // Final calculation
     int total_satisfaction;
     SatisfactionRating rating;
@@ -75,7 +78,8 @@ typedef struct TourSatisfaction {
 // =============================================================================
 
 // Start a new tour (resets tracking)
-void satisfaction_tour_start(TourSatisfaction* tour);
+// total_pois: Number of POIs available to visit (pass 0 if unknown)
+void satisfaction_tour_start(TourSatisfaction* tour, uint32_t total_pois);
 
 // End current tour (calculates final score)
 void satisfaction_tour_end(TourSatisfaction* tour);

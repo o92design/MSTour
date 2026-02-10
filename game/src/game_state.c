@@ -110,7 +110,7 @@ bool game_state_init(GameState* state, const ConfigFile* config) {
     
     // Start voyage and tour satisfaction tracking
     voyage_start();
-    satisfaction_tour_start(&state->game_ecs.tour);
+    satisfaction_tour_start(&state->game_ecs.tour, poi_count);
     state->voyage_active = true;
     state->results_showing = false;
     
@@ -175,7 +175,7 @@ void game_state_reset(GameState* state) {
     
     // Restart voyage and satisfaction tracking (results screen should already be hidden by caller)
     voyage_start();
-    satisfaction_tour_start(&state->game_ecs.tour);
+    satisfaction_tour_start(&state->game_ecs.tour, state->game_ecs.poi_world.poi_count);
     state->voyage_active = true;
     
     printf("Game state reset - voyage restarted, POIs cleared, fog reset\n");

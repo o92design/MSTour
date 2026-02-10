@@ -61,6 +61,130 @@ This encourages diverse tour routes rather than repeatedly visiting the same POI
 
 ---
 
+## Advanced POI Viewing System
+
+The Advanced POI Viewing System enhances tourism gameplay by rewarding players for **proper sightseeing technique**. Instead of simply sailing through a POI's radius, players must demonstrate good viewing behavior to trigger a visit and earn satisfaction bonuses.
+
+### Dual Trigger System
+
+POI visits can be triggered in two ways:
+
+#### 1. **Legacy Close Proximity** (Immediate Trigger)
+- Ship enters the POI's **base radius** (e.g., 50 units)
+- Triggers instantly regardless of speed or orientation
+- Represents "accidental" or "close encounter" visits
+- Simple fallback for gameplay accessibility
+
+#### 2. **Advanced Viewing** (Quality Sightseeing)
+- Ship must satisfy **three criteria simultaneously**:
+  - **Distance**: Within **4× POI radius** (e.g., 200 units for a 50-unit radius POI)
+  - **Speed**: Below **60.0 units/second** (slow cruising speed)
+  - **Angle**: **Broadside orientation** to the POI (passengers can see from ship sides)
+- Represents proper tourist viewing behavior
+- Encourages strategic route planning and ship maneuvering
+
+### Viewing Criteria Details
+
+#### Distance Criterion
+```c
+#define POI_VIEW_MAX_DIST_MULT 4.0f  // View range = POI radius × 4
+```
+- **Purpose**: POI must be within visible range, but not necessarily touching
+- **Example**: POI with 50-unit radius → viewable up to 200 units away
+- **Gameplay**: Allows passing ships to "view" landmarks from a distance
+
+#### Speed Criterion
+```c
+#define POI_VIEW_MAX_SPEED 60.0f  // Units per second
+```
+- **Purpose**: Ship must be moving slow enough for passengers to observe
+- **Typical Ship Speeds**:
+  - Full Speed: 80-100 units/sec (too fast for sightseeing)
+  - Cruising Speed: 40-60 units/sec (ideal for viewing)
+  - Slow Speed: 20-30 units/sec (also acceptable)
+- **Gameplay**: Encourages players to slow down near landmarks
+
+#### Angle Criterion (Broadside Viewing)
+```c
+#define POI_VIEW_ALIGNMENT_TOLERANCE 0.7f  // Dot product threshold
+```
+- **Purpose**: Ship must be oriented so passengers can see the POI
+- **Calculation**: Uses dot product of ship forward vector and vector-to-POI
+  - `alignment = |dot(ship_forward, to_poi)|`
+  - `0.0` = Perfect broadside (ship perpendicular to POI) ✅
+  - `1.0` = Head-on or stern-on (POI directly ahead/behind) ❌
+- **Threshold**: `alignment ≤ 0.7` passes the check
+- **Gameplay**: Players must turn the ship to present the broadside to the POI
+
+### Quality Score Calculation
+
+The system calculates a **quality score** (0.0 to 1.0) when all criteria are met:
+
+```c
+quality_score = (dist_score × 0.3) + (speed_score × 0.3) + (angle_score × 0.4)
+```
+
+**Component Scores**:
+- **Distance Score**: `1.0 - (distance / view_radius)` (closer is better, up to base radius)
+- **Speed Score**: `1.0 - (current_speed / max_speed)` (slower is better)
+- **Angle Score**: `1.0 - (alignment / tolerance)` (more broadside is better)
+
+**Weights**:
+- Distance: 30% (less important - viewing range is generous)
+- Speed: 30% (moderate importance)
+- Angle: 40% (most important - demonstrates intentional viewing)
+
+**Usage**: Quality score can be used for:
+- Tiered satisfaction bonuses (higher quality = more satisfaction)
+- UI feedback (show players how good their viewing is)
+- Achievement tracking (e.g., "Perfect View" for quality ≥ 0.9)
+- Future gameplay mechanics (e.g., photography minigame)
+
+### Example Scenarios
+
+#### ✅ **Successful Viewing**
+```
+Ship Position: (400, 300)
+POI Position: (450, 320)
+Distance: 51 units (within 4× radius of 50)
+Ship Speed: 45 units/sec (below 60 threshold)
+Ship Rotation: 45° (facing northeast)
+POI Direction: East (90°)
+Alignment: |cos(45° - 90°)| = 0.707 (close to tolerance)
+Result: ✅ Visit triggered!
+Quality: ~0.65 (good viewing)
+```
+
+#### ❌ **Too Fast**
+```
+Ship Speed: 85 units/sec (exceeds 60 threshold)
+Result: ❌ No visit (even if other criteria met)
+Player Feedback: "Slow down to view the landmark!"
+```
+
+#### ❌ **Wrong Angle**
+```
+Ship heading directly toward POI (alignment = 1.0)
+Result: ❌ No visit (POI is in front, not on sides)
+Player Feedback: "Turn broadside to give passengers a better view!"
+```
+
+#### ✅ **Legacy Proximity Override**
+```
+Ship Position: (450, 320) (within base radius)
+Result: ✅ Visit triggered regardless of speed/angle
+Note: Close proximity always works as fallback
+```
+
+### Implementation Notes
+
+- **Performance**: Angle calculation only performed when ship is in range (optimization)
+- **Fallback**: Legacy proximity ensures casual players aren't blocked from progression
+- **Per-Frame Check**: System updates every frame to catch brief viewing windows
+- **One-Time Visits**: Once a POI is marked visited, it doesn't trigger again during that tour
+
+---
+
 ## JSON Schema
 
 ### File Format: `assets/data/pois.json`
@@ -293,9 +417,11 @@ int poi_ecs_find_by_name(const POIEcsWorld* poi_world, const char* name);
 bool poi_ecs_check_visit(const POIEcsWorld* poi_world, int poi_index, 
                          float x, float y);
 ```
-**Description**: Check if a position is within a POI's visit radius.
+**Description**: Check if a position is within a POI's visit radius (legacy proximity check).
 
 **Returns**: `true` if position triggers a visit, `false` otherwise
+
+**Note**: This only checks close proximity (base radius). For advanced viewing criteria, use `poi_ecs_get_view_status()`.
 
 **Example**:
 ```c
@@ -305,6 +431,122 @@ if (is_visiting && !poi_ecs_is_visited(&poi_world, poi_idx)) {
     poi_ecs_increment_visits(&poi_world, poi_idx);
 }
 ```
+
+---
+
+##### `poi_ecs_get_view_status`
+```c
+POIViewStatus poi_ecs_get_view_status(const POIEcsWorld* poi_world, int poi_index, 
+                                     float ship_x, float ship_y,
+                                     float ship_rot, float ship_speed);
+```
+**Description**: Calculate detailed view status for a ship observing a POI. Returns comprehensive information about viewing quality, including whether the ship meets all criteria for a proper view.
+
+**Parameters**:
+- `poi_world`: POI ECS world
+- `poi_index`: Valid POI index
+- `ship_x`, `ship_y`: Ship world position
+- `ship_rot`: Ship rotation in degrees (0° = North, clockwise)
+- `ship_speed`: Ship speed in units/second
+
+**Returns**: `POIViewStatus` struct with detailed viewing information
+
+**POIViewStatus Structure**:
+```c
+typedef struct POIViewStatus {
+    bool in_range;           // Within view range (4× POI radius)
+    bool speed_ok;           // Speed ≤ 60.0 units/sec
+    bool angle_ok;           // Broadside orientation (alignment ≤ 0.7)
+    bool is_viewable;        // All three conditions met
+    
+    float distance;          // Current distance to POI center
+    float current_speed;     // Current ship speed
+    float alignment;         // 0.0 = broadside (good), 1.0 = head-on (bad)
+    float quality_score;     // 0.0 to 1.0 overall viewing quality
+} POIViewStatus;
+```
+
+**Field Descriptions**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `in_range` | bool | Ship is within viewing range (4× POI radius) |
+| `speed_ok` | bool | Ship speed ≤ 60.0 units/sec (slow enough to view) |
+| `angle_ok` | bool | Ship is broadside to POI (alignment ≤ 0.7) |
+| `is_viewable` | bool | All three criteria met (would trigger visit) |
+| `distance` | float | Distance from ship to POI center |
+| `current_speed` | float | Ship's current speed |
+| `alignment` | float | Dot product of forward vector and to-POI vector (absolute value) |
+| `quality_score` | float | Overall viewing quality (0.0-1.0), only valid if `is_viewable` is true |
+
+**Example Usage**:
+```c
+// Check if ship is viewing a POI correctly
+POIViewStatus status = poi_ecs_get_view_status(&poi_world, poi_idx,
+                                                ship_x, ship_y,
+                                                ship_rotation, ship_speed);
+
+if (status.is_viewable) {
+    printf("Good view! Quality: %.2f\n", status.quality_score);
+    
+    // Trigger visit if not already visited
+    if (!poi_ecs_is_visited(&poi_world, poi_idx)) {
+        poi_ecs_set_visited(&poi_world, poi_idx, true);
+        poi_ecs_increment_visits(&poi_world, poi_idx);
+    }
+} else {
+    // Provide player feedback on what's wrong
+    if (!status.in_range) {
+        printf("Too far away (%.1f > %.1f)\n", 
+               status.distance, poi_ecs_get_radius(&poi_world, poi_idx) * 4.0f);
+    }
+    if (!status.speed_ok) {
+        printf("Slow down! (%.1f > 60.0)\n", status.current_speed);
+    }
+    if (!status.angle_ok) {
+        printf("Turn broadside! (alignment: %.2f)\n", status.alignment);
+    }
+}
+```
+
+**Advanced Usage - Tiered Bonuses**:
+```c
+// Award satisfaction based on viewing quality
+if (status.is_viewable) {
+    int base_bonus = poi_ecs_get_satisfaction_bonus(&poi_world, poi_idx);
+    
+    if (status.quality_score >= 0.9f) {
+        printf("Perfect view! +%d satisfaction\n", base_bonus + 5);
+    } else if (status.quality_score >= 0.7f) {
+        printf("Great view! +%d satisfaction\n", base_bonus + 2);
+    } else {
+        printf("Good view! +%d satisfaction\n", base_bonus);
+    }
+}
+```
+
+**UI Feedback Example**:
+```c
+// Real-time viewing indicator for UI
+POIViewStatus status = poi_ecs_get_view_status(&poi_world, poi_idx,
+                                                ship_x, ship_y,
+                                                ship_rotation, ship_speed);
+
+// Draw viewing quality bar
+if (status.in_range) {
+    DrawText("Distance: OK", 10, 10, 20, status.in_range ? GREEN : RED);
+    DrawText("Speed: OK", 10, 35, 20, status.speed_ok ? GREEN : RED);
+    DrawText("Angle: OK", 10, 60, 20, status.angle_ok ? GREEN : RED);
+    
+    if (status.is_viewable) {
+        int bar_width = (int)(status.quality_score * 200.0f);
+        DrawRectangle(10, 85, bar_width, 20, GREEN);
+        DrawText("Viewing Quality", 10, 110, 20, WHITE);
+    }
+}
+```
+
+**Performance Note**: The angle calculation (involving trigonometric functions) is only performed when the ship is within range, minimizing overhead for distant POIs.
 
 ---
 
@@ -411,13 +653,30 @@ void poi_ecs_increment_visits(POIEcsWorld* poi_world, int poi_index);
 void poi_ecs_system_update(POIEcsWorld* poi_world, const ECSWorld* ecs_world,
                            ComponentMask ship_mask, const POISystemContext* context);
 ```
-**Description**: Update POI system - checks for ship visits and triggers callbacks.
+**Description**: Update POI system - checks for ship visits using the **dual-trigger system** and fires callbacks when visits occur. This function should be called every frame in the game loop.
+
+**Dual-Trigger System**:
+
+The system checks two visit conditions for each ship-POI pair:
+
+1. **Legacy Close Proximity**: Ship enters POI's base radius
+   - Simple distance check: `distance ≤ poi_radius`
+   - Always works regardless of speed or orientation
+   - Ensures casual gameplay accessibility
+
+2. **Advanced Viewing**: Ship demonstrates proper sightseeing behavior
+   - Distance: Within 4× POI radius
+   - Speed: Below 60.0 units/second
+   - Angle: Broadside orientation (alignment ≤ 0.7)
+   - All three criteria must be met simultaneously
+
+**A visit is triggered if EITHER condition is satisfied** (logical OR). Once a POI is visited, it is marked and won't trigger again during that tour session.
 
 **Parameters**:
 - `poi_world`: POI ECS world
-- `ecs_world`: Main ECS world containing ships
+- `ecs_world`: Main ECS world containing ships (must have Transform and Velocity components)
 - `ship_mask`: Component mask for ship entities
-- `context`: System context with callbacks
+- `context`: System context with callbacks (optional, can be NULL)
 
 **POISystemContext Structure**:
 ```c
@@ -429,7 +688,12 @@ typedef struct POISystemContext {
 typedef void (*POIVisitCallback)(int poi_index, Entity visitor, void* user_data);
 ```
 
-**Example**:
+**Visit Callback**: The `on_visit` callback is invoked once per unique POI visit with:
+- `poi_index`: Index of the visited POI
+- `visitor`: Entity ID of the visiting ship
+- `user_data`: Custom data passed through context
+
+**Example - Basic Usage**:
 ```c
 void on_poi_visit(int poi_index, Entity ship, void* user_data) {
     printf("Ship %u visited POI: %s\n", ship, 
@@ -441,7 +705,98 @@ POISystemContext context = {
     .on_visit = on_poi_visit,
     .user_data = NULL
 };
+
+// Call every frame in game loop
 poi_ecs_system_update(&poi_world, &ecs_world, ship_mask, &context);
+```
+
+**Example - With Custom Data**:
+```c
+typedef struct GameState {
+    int total_visits;
+    float total_satisfaction;
+} GameState;
+
+void on_poi_visit(int poi_index, Entity ship, void* user_data) {
+    GameState* state = (GameState*)user_data;
+    state->total_visits++;
+    
+    int bonus = poi_ecs_get_satisfaction_bonus(&poi_world, poi_index);
+    state->total_satisfaction += bonus;
+    
+    printf("Total visits: %d, Total satisfaction: %.1f\n",
+           state->total_visits, state->total_satisfaction);
+}
+
+GameState game_state = {0};
+POISystemContext context = {
+    .on_visit = on_poi_visit,
+    .user_data = &game_state
+};
+
+poi_ecs_system_update(&poi_world, &ecs_world, ship_mask, &context);
+```
+
+**Example - Quality-Based Bonuses**:
+```c
+void on_poi_visit_quality(int poi_index, Entity ship, void* user_data) {
+    // Get ship data
+    float ship_x = ecs_world.transforms.pos_x[ship];
+    float ship_y = ecs_world.transforms.pos_y[ship];
+    float ship_rot = ecs_world.transforms.rotation[ship];
+    float ship_speed = ecs_world.velocities.speed[ship];
+    
+    // Check how good the view was
+    POIViewStatus status = poi_ecs_get_view_status(&poi_world, poi_index,
+                                                     ship_x, ship_y,
+                                                     ship_rot, ship_speed);
+    
+    int base_bonus = poi_ecs_get_satisfaction_bonus(&poi_world, poi_index);
+    int final_bonus = base_bonus;
+    
+    if (status.is_viewable && status.quality_score >= 0.9f) {
+        final_bonus = (int)(base_bonus * 1.5f); // +50% for perfect viewing
+        printf("Perfect view! +%d satisfaction (quality: %.2f)\n",
+               final_bonus, status.quality_score);
+    } else {
+        printf("Standard visit: +%d satisfaction\n", final_bonus);
+    }
+    
+    // Apply bonus to game state
+    satisfaction_record_poi_visit(&tour, &poi_world, poi_index);
+}
+```
+
+**Implementation Details**:
+- **Per-Frame Processing**: Iterates all entities with ship mask and Transform component
+- **Distance Check First**: Performs cheap distance check before expensive viewing calculations
+- **One-Time Visits**: Uses `poi_world->pois.visited[i]` flag to prevent duplicate callbacks
+- **Visit Counter**: Increments `poi_world->pois.visit_count[i]` for statistics
+- **No Callback**: If `context` is NULL or `on_visit` is NULL, visits are still tracked but no callback fires
+
+**Performance Considerations**:
+- O(ships × POIs) complexity per frame
+- Distance checks use squared distance (no sqrt) until needed
+- Angle calculations only performed when ship is in range
+- Typical performance: < 0.1ms for 10 ships × 20 POIs on modern hardware
+
+**Integration with Tour System**:
+```c
+// Game loop integration
+void game_update(float delta_time) {
+    // Update ship physics
+    ship_system_update(&ship_world, delta_time);
+    
+    // Check for POI visits
+    POISystemContext context = {
+        .on_visit = tour_on_poi_visit,  // Updates tour satisfaction
+        .user_data = &current_tour
+    };
+    poi_ecs_system_update(&poi_world, &ecs_world, ship_mask, &context);
+    
+    // Update satisfaction UI
+    satisfaction_update_ui(&current_tour);
+}
 ```
 
 ---

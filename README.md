@@ -6,6 +6,16 @@ A shipping company management game set in the Gothenburg archipelago.
 
 MS Tour is a game where you manage a fleet of ships navigating between islands in the beautiful Gothenburg archipelago. Handle cargo, optimize routes, and grow your shipping empire.
 
+## Key Features
+
+- **Advanced Tourism System**: Visit Points of Interest (POIs) throughout the archipelago
+- **Realistic Sightseeing Mechanics**: Slow down and turn broadside to give passengers the best views
+- **Strategic Route Planning**: Optimize routes to maximize POI visits and passenger satisfaction
+- **Data-Oriented Architecture**: High-performance engine built with cache-friendly design patterns
+- **Modular Systems**: ECS architecture with clear separation between engine and game logic
+
+For detailed information about the POI system, see [docs/POI_SYSTEM.md](docs/POI_SYSTEM.md).
+
 ## Technical Details
 
 - **Engine**: Custom C++ game engine (data-oriented design)

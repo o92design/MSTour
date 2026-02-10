@@ -6,11 +6,12 @@
 // Tour Lifecycle
 // =============================================================================
 
-void satisfaction_tour_start(TourSatisfaction* tour) {
+void satisfaction_tour_start(TourSatisfaction* tour, uint32_t total_pois) {
     if (!tour) return;
     
     memset(tour, 0, sizeof(TourSatisfaction));
     tour->active = true;
+    tour->total_pois_target = total_pois;
 }
 
 void satisfaction_tour_end(TourSatisfaction* tour) {
@@ -115,6 +116,11 @@ int satisfaction_calculate_score(const TourSatisfaction* tour) {
     int score = config.base_satisfaction;
     score += tour->poi_bonus_total;
     score += tour->variety_bonus;
+    
+    // Check for completion bonus (100% satisfaction if all planned POIs visited)
+    if (tour->total_pois_target > 0 && tour->visited_count >= tour->total_pois_target) {
+        if (score < 100) score = 100;
+    }
     
     // Clamp to 0-100
     if (score < 0) score = 0;
@@ -239,7 +245,9 @@ void satisfaction_debug_print(const TourSatisfaction* tour) {
     printf("[Satisfaction] Tour %s\n", tour->active ? "(Active)" : "(Complete)");
     printf("  Score: %d (%s)\n", stats.total_satisfaction, 
            satisfaction_rating_to_string(stats.rating));
-    printf("  POIs Visited: %u\n", stats.pois_visited);
+    printf("  POIs Visited: %u / %u\n", stats.pois_visited, tour->total_pois_target);
+    printf("  Target reached: %s\n", 
+           (tour->total_pois_target > 0 && stats.pois_visited >= tour->total_pois_target) ? "YES" : "NO");
     printf("    Nature: %s, Historical: %s, Military: %s\n",
            tour->has_nature ? "Yes" : "No",
            tour->has_historical ? "Yes" : "No",

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "description": "Test Route - Vinga Lighthouse Tour (2 POIs for compass testing)",
+  "description": "Test Route - Archipelago Tour (10 POIs)",
   "pois": [
     {
       "id": "poi_test_1",
@@ -17,13 +17,17 @@
       "name": "Hönö Klåva Island",
       "type": "nature",
       "tier": "general",
-      "position": { "x": 300.0, "y": 0.0 },
+      "position": { "x": 500.0, "y": 0.0 },
       "radius": 80.0,
       "satisfaction_bonus": 15,
       "description": "Second test POI - continuing east"
-    }
-  ]
-}
+    },
+    {
+      "id": "poi_vrångö_reserve",
+      "name": "Vrångö Nature Reserve",
+      "type": "nature",
+      "tier": "special",
+      "position": { "x": 900.0, "y": 500.0 },
       "radius": 100.0,
       "satisfaction_bonus": 18,
       "description": "Pristine nature reserve with rare bird species"
